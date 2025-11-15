@@ -154,7 +154,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                     placeholder="tu@ejemplo.com"
                   />
                 </div>
@@ -174,7 +174,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                       placeholder="Ingresa tu nombre completo"
                     />
                   </div>
@@ -189,7 +189,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.address}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                       placeholder="Calle Principal 123"
                     />
                   </div>
@@ -205,7 +205,7 @@ export default function CheckoutPage() {
                         required
                         value={formData.city}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                       />
                     </div>
                     <div>
@@ -218,7 +218,7 @@ export default function CheckoutPage() {
                         required
                         value={formData.postalCode}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                       />
                     </div>
                   </div>
@@ -233,7 +233,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.country}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent bg-gray-50"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent bg-gray-50 text-gray-900 placeholder:text-gray-400"
                     />
                   </div>
 
@@ -269,7 +269,7 @@ export default function CheckoutPage() {
                         onChange={handleChange}
                         placeholder="0000 0000 0000 0000"
                         maxLength="19"
-                        className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+                        className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                       />
                       <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <rect x="2" y="5" width="20" height="14" rx="2" strokeWidth="2"/>
@@ -291,7 +291,7 @@ export default function CheckoutPage() {
                         onChange={handleChange}
                         placeholder="MM / AA"
                         maxLength="7"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                       />
                     </div>
                     <div>
@@ -310,7 +310,7 @@ export default function CheckoutPage() {
                         onChange={handleChange}
                         placeholder="123"
                         maxLength="4"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                       />
                     </div>
                   </div>
@@ -347,7 +347,7 @@ export default function CheckoutPage() {
                     value={discountCode}
                     onChange={(e) => setDiscountCode(e.target.value)}
                     placeholder="Código de descuento"
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-sm"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-sm text-gray-900 placeholder:text-gray-400"
                   />
                   <button
                     type="button"
