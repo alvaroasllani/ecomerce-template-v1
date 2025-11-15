@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
@@ -10,10 +10,14 @@ export default function ConfirmationPage() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get("order");
   const { clearCart } = useCart();
+  const hasCleared = useRef(false);
 
   useEffect(() => {
-    // Limpiar el carrito cuando llegamos a la confirmación
-    clearCart();
+    // Limpiar el carrito solo una vez cuando llegamos a la confirmación
+    if (!hasCleared.current) {
+      clearCart();
+      hasCleared.current = true;
+    }
   }, [clearCart]);
 
   if (!orderNumber) {
@@ -44,39 +48,37 @@ export default function ConfirmationPage() {
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">Thank You!</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">¡Gracias!</h1>
           
           {/* Message */}
-          <p className="text-gray-600 mb-2">Your order is on its way!</p>
+          <p className="text-gray-600 mb-2">¡Tu pedido está en camino!</p>
           <p className="text-sm text-gray-500 mb-6">
-            Order Number: <span className="font-semibold text-gray-900">#{orderNumber}</span>. 
-            A confirmation email has been sent to your address.
+            Número de Pedido: <span className="font-semibold text-gray-900">#{orderNumber}</span>. 
+            Se ha enviado un correo de confirmación a tu dirección.
           </p>
 
           {/* Buttons */}
           <div className="space-y-3">
             <Link href="/products">
               <button className="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
-                Continue Shopping
+                Seguir Comprando
               </button>
             </Link>
-            <button
-              onClick={() => alert(`Tracking order #${orderNumber} (Demo)`)}
-              className="w-full text-indigo-600 py-3 px-6 font-semibold hover:text-indigo-700 transition-colors"
-            >
-              Track My Order
-            </button>
+            <Link href="/orders">
+              <button className="w-full text-indigo-600 py-3 px-6 font-semibold hover:text-indigo-700 transition-colors">
+                Ver Mis Pedidos
+              </button>
+            </Link>
           </div>
         </div>
 
         {/* Additional Info */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-600">
-            Need help? <Link href="/contact" className="text-indigo-600 hover:text-indigo-700 font-medium">Contact our support team</Link>
+            ¿Necesitas ayuda? <Link href="/contact" className="text-indigo-600 hover:text-indigo-700 font-medium">Contacta a nuestro equipo de soporte</Link>
           </p>
         </div>
       </div>
     </div>
   );
 }
-

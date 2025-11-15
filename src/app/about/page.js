@@ -7,63 +7,63 @@ export default function AboutPage() {
       <Header />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h1 className="text-5xl font-bold text-gray-900 mb-8 text-center">About Tech Accessories</h1>
+        <h1 className="text-5xl font-bold text-gray-900 mb-8 text-center">Sobre Tech Accessories</h1>
         
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-sm">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Story</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Nuestra Historia</h2>
           <p className="text-gray-700 leading-relaxed mb-4">
-            Tech Accessories was founded with a simple mission: to provide high-quality, premium tech 
-            accessories that enhance your workspace and boost productivity. We believe 
-            that technology should be both functional and beautiful.
+            Tech Accessories fue fundada con una misión simple: proporcionar accesorios tecnológicos premium 
+            que mejoren tu espacio de trabajo y aumenten la productividad. Creemos 
+            que la tecnología debe ser tanto funcional como hermosa.
           </p>
           <p className="text-gray-700 leading-relaxed">
-            Every product in our collection is carefully curated and tested to ensure it meets 
-            our high standards for quality, design, and functionality. We work directly with 
-            top manufacturers to bring you the best products at fair prices.
+            Cada producto en nuestra colección es cuidadosamente seleccionado y probado para asegurar que cumple 
+            con nuestros altos estándares de calidad, diseño y funcionalidad. Trabajamos directamente con 
+            los mejores fabricantes para ofrecerte los mejores productos a precios justos.
           </p>
         </div>
 
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-sm">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Values</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Nuestros Valores</h2>
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Quality First</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Calidad Primero</h3>
               <p className="text-gray-700">
-                We never compromise on quality. Every product is thoroughly tested before 
-                making it to our store.
+                Nunca comprometemos la calidad. Cada producto es rigurosamente probado antes 
+                de llegar a nuestra tienda.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Minimalist Design</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Diseño Minimalista</h3>
               <p className="text-gray-700">
-                We believe in the power of simplicity. Our products feature clean, timeless 
-                designs that never go out of style.
+                Creemos en el poder de la simplicidad. Nuestros productos presentan diseños limpios y atemporales 
+                que nunca pasan de moda.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Customer Satisfaction</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Satisfacción del Cliente</h3>
               <p className="text-gray-700">
-                Your satisfaction is our priority. We offer hassle-free returns and 
-                responsive customer support.
+                Tu satisfacción es nuestra prioridad. Ofrecemos devoluciones sin complicaciones y 
+                atención al cliente receptiva.
               </p>
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-8 shadow-sm">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Us</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Contáctanos</h2>
           <p className="text-gray-700 mb-4">
-            Have questions? We'd love to hear from you. Reach out to our team:
+            ¿Tienes preguntas? Nos encantaría saber de ti. Contacta a nuestro equipo:
           </p>
           <div className="space-y-2">
             <p className="text-gray-700">
               <span className="font-semibold">Email:</span> hello@techaccessories.com
             </p>
             <p className="text-gray-700">
-              <span className="font-semibold">Phone:</span> (555) 123-4567
+              <span className="font-semibold">Teléfono:</span> (555) 123-4567
             </p>
             <p className="text-gray-700">
-              <span className="font-semibold">Hours:</span> Monday - Friday, 9am - 6pm EST
+              <span className="font-semibold">Horario:</span> Lunes - Viernes, 9am - 6pm EST
             </p>
           </div>
         </div>
@@ -73,4 +73,3 @@ export default function AboutPage() {
     </div>
   );
 }
-

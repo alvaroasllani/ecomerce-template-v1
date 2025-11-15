@@ -14,13 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Tech Accessories - Premium Tech Gear",
-  description: "Premium accessories for your modern workspace. Shop keyboards, mice, desk mats, and more.",
+  title: "Tech Accessories - Accesorios Tecnológicos Premium",
+  description: "Accesorios premium para tu espacio de trabajo moderno. Compra teclados, ratones, alfombrillas y más.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

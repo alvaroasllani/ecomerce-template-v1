@@ -35,7 +35,7 @@ export default function CartDrawer() {
       <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col animate-slide-in">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Your Cart</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Tu Carrito</h2>
           <button
             onClick={() => setIsCartOpen(false)}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -75,10 +75,10 @@ export default function CartDrawer() {
                 />
               </svg>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Your cart is empty
+                Tu carrito está vacío
               </h3>
               <p className="text-gray-600 mb-6">
-                Add some products to get started!
+                ¡Agrega algunos productos para comenzar!
               </p>
               <button
                 onClick={() => {
@@ -87,7 +87,7 @@ export default function CartDrawer() {
                 }}
                 className="bg-indigo-600 text-white px-6 py-3 rounded-full font-medium hover:bg-indigo-700 transition-colors"
               >
-                Continue Shopping
+                Seguir Comprando
               </button>
             </div>
           ) : (
@@ -175,19 +175,28 @@ export default function CartDrawer() {
               </span>
             </div>
             <p className="text-sm text-gray-600">
-              Taxes and shipping calculated at checkout.
+              Impuestos y envío calculados al finalizar la compra.
             </p>
+            <button
+              onClick={() => {
+                setIsCartOpen(false);
+                router.push("/cart");
+              }}
+              className="w-full bg-white text-indigo-600 py-3 rounded-lg font-semibold border-2 border-indigo-600 hover:bg-indigo-50 transition-colors"
+            >
+              Ver Carrito Completo
+            </button>
             <button
               onClick={handleCheckout}
               className="w-full bg-indigo-600 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg"
             >
-              Proceed to Checkout
+              Proceder al Pago
             </button>
             <button
               onClick={() => setIsCartOpen(false)}
               className="w-full text-indigo-600 py-2 font-medium hover:text-indigo-700 transition-colors"
             >
-              Continue Shopping
+              Seguir Comprando
             </button>
           </div>
         )}

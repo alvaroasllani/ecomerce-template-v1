@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 const CartContext = createContext();
 
@@ -26,7 +26,7 @@ export function CartProvider({ children }) {
   }, [cart]);
 
   // Agregar producto al carrito
-  const addToCart = (product, quantity = 1, color = null) => {
+  const addToCart = useCallback((product, quantity = 1, color = null) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find(
         (item) => item.id === product.id && item.color === color
@@ -43,10 +43,17 @@ export function CartProvider({ children }) {
       return [...prevCart, { ...product, quantity, color }];
     });
     setIsCartOpen(true);
-  };
+  }, []);
+
+  // Eliminar producto del carrito
+  const removeFromCart = useCallback((productId, color) => {
+    setCart((prevCart) =>
+      prevCart.filter((item) => !(item.id === productId && item.color === color))
+    );
+  }, []);
 
   // Actualizar cantidad de un producto
-  const updateQuantity = (productId, color, newQuantity) => {
+  const updateQuantity = useCallback((productId, color, newQuantity) => {
     if (newQuantity <= 0) {
       removeFromCart(productId, color);
       return;
@@ -59,10 +66,10 @@ export function CartProvider({ children }) {
           : item
       )
     );
-  };
+  }, [removeFromCart]);
 
   // Incrementar cantidad
-  const incrementQuantity = (productId, color) => {
+  const incrementQuantity = useCallback((productId, color) => {
     setCart((prevCart) =>
       prevCart.map((item) =>
         item.id === productId && item.color === color
@@ -70,10 +77,10 @@ export function CartProvider({ children }) {
           : item
       )
     );
-  };
+  }, []);
 
   // Decrementar cantidad
-  const decrementQuantity = (productId, color) => {
+  const decrementQuantity = useCallback((productId, color) => {
     setCart((prevCart) =>
       prevCart.map((item) =>
         item.id === productId && item.color === color
@@ -81,19 +88,12 @@ export function CartProvider({ children }) {
           : item
       )
     );
-  };
-
-  // Eliminar producto del carrito
-  const removeFromCart = (productId, color) => {
-    setCart((prevCart) =>
-      prevCart.filter((item) => !(item.id === productId && item.color === color))
-    );
-  };
+  }, []);
 
   // Limpiar carrito
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
-  };
+  }, []);
 
   // Calcular totales
   const cartTotal = cart.reduce(

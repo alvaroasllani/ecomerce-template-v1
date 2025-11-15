@@ -19,7 +19,7 @@ export default function CheckoutPage() {
     address: "",
     city: "",
     postalCode: "",
-    country: "United States",
+    country: "Estados Unidos",
     cardNumber: "",
     expiryDate: "",
     cvv: "",
@@ -32,8 +32,36 @@ export default function CheckoutPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
     // Generar número de orden aleatorio
     const orderNumber = Math.floor(100000000 + Math.random() * 900000000);
+    
+    // Crear objeto de pedido
+    const order = {
+      orderNumber: orderNumber,
+      date: new Date().toISOString(),
+      status: "Processing",
+      items: cart,
+      subtotal: cartTotal,
+      discount: appliedDiscount,
+      shipping: shippingCost,
+      total: total,
+      email: formData.email,
+      shippingAddress: {
+        fullName: formData.fullName,
+        address: formData.address,
+        city: formData.city,
+        postalCode: formData.postalCode,
+        country: formData.country,
+      }
+    };
+    
+    // Guardar pedido en localStorage
+    const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+    existingOrders.push(order);
+    localStorage.setItem("orders", JSON.stringify(existingOrders));
+    
+    // Redirigir a confirmación
     router.push(`/checkout/confirmation?order=${orderNumber}`);
   };
 
@@ -55,7 +83,7 @@ export default function CheckoutPage() {
     if (discounts[discountCode.toUpperCase()]) {
       setAppliedDiscount(discounts[discountCode.toUpperCase()]);
     } else {
-      alert("Invalid discount code");
+      alert("Código de descuento inválido");
     }
   };
 
@@ -77,13 +105,13 @@ export default function CheckoutPage() {
               d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
             />
           </svg>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
-          <p className="text-gray-600 mb-8">Add some products before checking out.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Tu carrito está vacío</h1>
+          <p className="text-gray-600 mb-8">Agrega algunos productos antes de finalizar la compra.</p>
           <button
             onClick={() => router.push("/products")}
             className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
           >
-            Continue Shopping
+            Seguir Comprando
           </button>
         </div>
         <Footer />
@@ -98,27 +126,27 @@ export default function CheckoutPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm mb-8">
-          <Link href="/products" className="text-indigo-600 hover:text-indigo-700">
-            Cart
+          <Link href="/orders" className="text-indigo-600 hover:text-indigo-700">
+            Mis Pedidos
           </Link>
           <span className="text-gray-400">/</span>
           <span className="font-semibold text-gray-900">Checkout</span>
           <span className="text-gray-400">/</span>
-          <span className="text-gray-400">Confirmation</span>
+          <span className="text-gray-400">Confirmación</span>
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Checkout Form */}
           <div className="lg:col-span-2">
-            <h1 className="text-4xl font-bold text-gray-900 mb-8">Checkout</h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-8">Finalizar Compra</h1>
 
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Contact */}
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Contacto</h2>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
+                    Correo Electrónico
                   </label>
                   <input
                     type="email"
@@ -127,18 +155,18 @@ export default function CheckoutPage() {
                     value={formData.email}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
-                    placeholder="you@example.com"
+                    placeholder="tu@ejemplo.com"
                   />
                 </div>
               </div>
 
               {/* Shipping Address */}
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Shipping Address</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Dirección de Envío</h2>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name
+                      Nombre Completo
                     </label>
                     <input
                       type="text"
@@ -147,13 +175,13 @@ export default function CheckoutPage() {
                       value={formData.fullName}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
-                      placeholder="Enter your full name"
+                      placeholder="Ingresa tu nombre completo"
                     />
                   </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Address
+                      Dirección
                     </label>
                     <input
                       type="text"
@@ -162,14 +190,14 @@ export default function CheckoutPage() {
                       value={formData.address}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
-                      placeholder="123 Main St"
+                      placeholder="Calle Principal 123"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        City
+                        Ciudad
                       </label>
                       <input
                         type="text"
@@ -182,7 +210,7 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Postal Code
+                        Código Postal
                       </label>
                       <input
                         type="text"
@@ -197,7 +225,7 @@ export default function CheckoutPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Country
+                      País
                     </label>
                     <input
                       type="text"
@@ -218,7 +246,7 @@ export default function CheckoutPage() {
                       className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-600"
                     />
                     <label className="ml-2 text-sm text-gray-700">
-                      Save this information for next time
+                      Guardar esta información para la próxima vez
                     </label>
                   </div>
                 </div>
@@ -226,11 +254,11 @@ export default function CheckoutPage() {
 
               {/* Payment */}
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Payment</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Pago</h2>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Card Number
+                      Número de Tarjeta
                     </label>
                     <div className="relative">
                       <input
@@ -253,7 +281,7 @@ export default function CheckoutPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Expiry Date
+                        Fecha de Vencimiento
                       </label>
                       <input
                         type="text"
@@ -261,7 +289,7 @@ export default function CheckoutPage() {
                         required
                         value={formData.expiryDate}
                         onChange={handleChange}
-                        placeholder="MM / YY"
+                        placeholder="MM / AA"
                         maxLength="7"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
                       />
@@ -294,7 +322,7 @@ export default function CheckoutPage() {
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl border border-gray-200 p-6 sticky top-24">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Order</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Tu Pedido</h2>
               
               <div className="space-y-4 mb-6">
                 {cart.map((item) => (
@@ -304,7 +332,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-gray-900 text-sm mb-1">{item.name}</p>
-                      <p className="text-xs text-gray-600">Qty: {item.quantity}</p>
+                      <p className="text-xs text-gray-600">Cant: {item.quantity}</p>
                     </div>
                     <p className="font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
                   </div>
@@ -318,7 +346,7 @@ export default function CheckoutPage() {
                     type="text"
                     value={discountCode}
                     onChange={(e) => setDiscountCode(e.target.value)}
-                    placeholder="Discount code"
+                    placeholder="Código de descuento"
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-sm"
                   />
                   <button
@@ -326,12 +354,12 @@ export default function CheckoutPage() {
                     onClick={handleApplyDiscount}
                     className="px-6 py-2 bg-indigo-100 text-indigo-700 rounded-lg font-medium hover:bg-indigo-200 transition-colors text-sm"
                   >
-                    Apply
+                    Aplicar
                   </button>
                 </div>
                 {appliedDiscount > 0 && (
                   <p className="text-sm text-green-600 mt-2">
-                    ✓ Discount of ${appliedDiscount.toFixed(2)} applied!
+                    ✓ Descuento de ${appliedDiscount.toFixed(2)} aplicado!
                   </p>
                 )}
               </div>
@@ -343,14 +371,14 @@ export default function CheckoutPage() {
                 </div>
                 {appliedDiscount > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Discount</span>
+                    <span className="text-gray-600">Descuento</span>
                     <span className="font-semibold text-green-600">-${appliedDiscount.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Shipping</span>
+                  <span className="text-gray-600">Envío</span>
                   <span className="font-semibold text-gray-900">
-                    {shippingCost === 0 ? "FREE" : `$${shippingCost.toFixed(2)}`}
+                    {shippingCost === 0 ? "GRATIS" : `$${shippingCost.toFixed(2)}`}
                   </span>
                 </div>
                 <div className="border-t border-gray-200 pt-3 flex justify-between">
@@ -363,14 +391,14 @@ export default function CheckoutPage() {
                 onClick={handleSubmit}
                 className="w-full bg-indigo-600 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg mb-4"
               >
-                Complete Order
+                Completar Pedido
               </button>
 
               <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                <span>Your payment is secure and encrypted.</span>
+                <span>Tu pago es seguro y encriptado.</span>
               </div>
             </div>
           </div>
