@@ -113,10 +113,10 @@ export default function CartPage() {
                       {/* Price */}
                       <div className="text-right">
                         <p className="text-2xl font-bold text-gray-900">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          Bs {(item.price * item.quantity).toFixed(2)}
                         </p>
                         <p className="text-sm text-gray-600">
-                          ${item.price.toFixed(2)} c/u
+                          Bs {item.price.toFixed(2)} c/u
                         </p>
                       </div>
                     </div>
@@ -142,31 +142,31 @@ export default function CartPage() {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-gray-700">
                   <span>Subtotal ({cart.length} {cart.length === 1 ? 'producto' : 'productos'})</span>
-                  <span className="font-semibold">${cartTotal.toFixed(2)}</span>
+                  <span className="font-semibold">Bs {cartTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700">
                   <span>Envío</span>
                   <span className="font-semibold">
-                    {cartTotal > 200 ? "GRATIS" : "$5.00"}
+                    {cartTotal > 500 ? "GRATIS" : "Bs 20.00"}
                   </span>
                 </div>
                 <div className="border-t border-gray-200 pt-4 flex justify-between">
                   <span className="text-xl font-bold text-gray-900">Total</span>
                   <span className="text-2xl font-bold text-gray-900">
-                    ${(cartTotal > 200 ? cartTotal : cartTotal + 5).toFixed(2)}
+                    Bs {(cartTotal > 500 ? cartTotal : cartTotal + 20).toFixed(2)}
                   </span>
                 </div>
               </div>
 
-              {cartTotal < 200 && (
+              {cartTotal < 500 && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
                   <p className="text-sm text-amber-800">
-                    Agrega <span className="font-semibold">${(200 - cartTotal).toFixed(2)}</span> más para obtener envío gratis
+                    Agrega <span className="font-semibold">Bs {(500 - cartTotal).toFixed(2)}</span> más para obtener envío gratis
                   </p>
                   <div className="mt-2 bg-white rounded-full h-2 overflow-hidden">
                     <div
                       className="bg-amber-500 h-full transition-all duration-300"
-                      style={{ width: `${(cartTotal / 200) * 100}%` }}
+                      style={{ width: `${(cartTotal / 500) * 100}%` }}
                     ></div>
                   </div>
                 </div>

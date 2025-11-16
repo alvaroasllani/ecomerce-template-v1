@@ -125,7 +125,7 @@ export default function OrdersPage() {
                     </div>
                     <div className="text-left sm:text-right">
                       <p className="text-2xl font-bold text-gray-900">
-                        ${order.total.toFixed(2)}
+                        Bs {order.total.toFixed(2)}
                       </p>
                       <p className="text-sm text-gray-600">
                         {order.items.length} {order.items.length === 1 ? "artículo" : "artículos"}
@@ -152,7 +152,7 @@ export default function OrdersPage() {
                           </p>
                         </div>
                         <p className="font-semibold text-gray-900">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          Bs {(item.price * item.quantity).toFixed(2)}
                         </p>
                       </div>
                     ))}
@@ -201,23 +201,17 @@ export default function OrdersPage() {
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Subtotal</span>
-                            <span className="text-gray-900">${order.subtotal.toFixed(2)}</span>
+                            <span className="text-gray-900">Bs {order.subtotal.toFixed(2)}</span>
                           </div>
-                          {order.discount > 0 && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Descuento</span>
-                              <span className="text-green-600">-${order.discount.toFixed(2)}</span>
-                            </div>
-                          )}
                           <div className="flex justify-between">
                             <span className="text-gray-600">Envío</span>
                             <span className="text-gray-900">
-                              {order.shipping === 0 ? "GRATIS" : `$${order.shipping.toFixed(2)}`}
+                              {order.shipping === 0 ? "GRATIS" : `Bs ${order.shipping.toFixed(2)}`}
                             </span>
                           </div>
                           <div className="flex justify-between pt-2 border-t border-gray-200 font-semibold">
                             <span className="text-gray-900">Total</span>
-                            <span className="text-gray-900">${order.total.toFixed(2)}</span>
+                            <span className="text-gray-900">Bs {order.total.toFixed(2)}</span>
                           </div>
                         </div>
                       </div>

@@ -106,11 +106,11 @@ export default function AdminDashboard() {
               </svg>
             </div>
             <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded">
-              +${stats.todayRevenue.toFixed(2)} hoy
+              +Bs {stats.todayRevenue.toFixed(2)} hoy
             </span>
           </div>
           <p className="text-2xl font-bold text-gray-900 mb-1">
-            ${stats.totalRevenue.toFixed(2)}
+            Bs {stats.totalRevenue.toFixed(2)}
           </p>
           <p className="text-sm text-gray-600">Ingresos Totales</p>
         </div>
@@ -211,7 +211,7 @@ export default function AdminDashboard() {
                     <p className="text-xs text-gray-500">{new Date(order.date).toLocaleDateString('es-ES')}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-gray-900">${order.total.toFixed(2)}</p>
+                    <p className="font-bold text-gray-900">Bs {order.total.toFixed(2)}</p>
                     <p className="text-xs text-gray-500">{order.items.length} items</p>
                   </div>
                 </div>
@@ -252,7 +252,7 @@ export default function AdminDashboard() {
                   <div className={`w-12 h-12 ${product.bgColor || 'bg-gray-200'} rounded-lg flex-shrink-0`}></div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900 truncate">{product.name}</p>
-                    <p className="text-sm text-gray-600">${product.price.toFixed(2)}</p>
+                    <p className="text-sm text-gray-600">Bs {product.price.toFixed(2)}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-gray-900">{product.quantity}</p>

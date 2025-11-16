@@ -76,7 +76,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Teléfono</h3>
-                  <p className="text-gray-600">+34 900 123 456</p>
+                  <p className="text-gray-600">+591 2 2123456</p>
+                  <p className="text-gray-600">+591 70123456 (Celular)</p>
                   <p className="text-sm text-gray-500 mt-1">Lun-Vie: 9:00 - 18:00</p>
                 </div>
               </div>
@@ -93,8 +94,9 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Oficina</h3>
                   <p className="text-gray-600">
-                    Calle Gran Vía 123<br />
-                    28013 Madrid, España
+                    Av. 6 de Agosto #2170<br />
+                    Zona Sopocachi<br />
+                    La Paz, Bolivia
                   </p>
                 </div>
               </div>

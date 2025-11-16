@@ -83,7 +83,7 @@ export default function Home() {
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Envío Gratis</h3>
-            <p className="text-gray-600">En pedidos superiores a $50</p>
+            <p className="text-gray-600">En pedidos superiores a Bs 500</p>
           </div>
 
           <div className="text-center p-6">
