@@ -15,15 +15,6 @@ Aplicación de ecommerce completa construida con Next.js 16, React 19 y Tailwind
 - Node.js 18.x o superior
 - npm o yarn
 
-## Instalación
-
-```bash
-npm install
-npm run dev
-```
-
-La aplicación estará disponible en `http://localhost:3000`
-
 ## Estructura del Proyecto
 
 ```
@@ -214,13 +205,6 @@ Contraseña: demo123
 
 Más usuarios disponibles en `src/data/users.js`
 
-## Códigos de Descuento
-
-Códigos disponibles para pruebas en checkout:
-
-- `WELCOME10` - $10 de descuento
-- `SAVE20` - $20 de descuento
-
 ## Almacenamiento de Datos
 
 La aplicación utiliza localStorage del navegador:
@@ -291,15 +275,6 @@ El sistema mapea automáticamente entre slugs de URL y nombres de categorías:
 /products?category=desk-mats → Alfombrillas
 ```
 
-## Scripts Disponibles
-
-```bash
-npm run dev      # Servidor de desarrollo en http://localhost:3000
-npm run build    # Construir para producción
-npm run start    # Iniciar servidor de producción
-npm run lint     # Ejecutar ESLint
-```
-
 ## Notas Técnicas
 
 ### Optimizaciones
@@ -315,13 +290,6 @@ npm run lint     # Ejecutar ESLint
 - Breakpoints: sm, md, lg, xl
 - Navegación sticky
 - Drawer lateral en móvil
-
-### Accesibilidad
-
-- Atributos ARIA en botones interactivos
-- Contraste de colores optimizado
-- Navegación por teclado
-- Labels descriptivos en formularios
 
 ## Paleta de Colores
 

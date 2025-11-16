@@ -24,7 +24,7 @@ export default function ProductCard({ product }) {
           </h3>
           <p className="text-sm text-gray-600 mb-4">{product.description}</p>
           <div className="flex justify-between items-center">
-            <p className="text-xl font-bold text-gray-900">${product.price}</p>
+            <p className="text-xl font-bold text-gray-900">Bs {product.price.toFixed(2)}</p>
             <button 
               onClick={handleAddToCart}
               className="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-indigo-700 transition-colors"

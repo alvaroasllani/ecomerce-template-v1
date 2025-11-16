@@ -10,25 +10,23 @@ import { useCart } from "@/context/CartContext";
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, cartTotal } = useCart();
-  const [discountCode, setDiscountCode] = useState("");
-  const [appliedDiscount, setAppliedDiscount] = useState(0);
   
   const [formData, setFormData] = useState({
     email: "",
     fullName: "",
+    phone: "",
     address: "",
     city: "",
-    postalCode: "",
-    country: "Estados Unidos",
+    zone: "",
+    country: "Bolivia",
     cardNumber: "",
     expiryDate: "",
     cvv: "",
     saveInfo: false,
   });
 
-  const shippingCost = cartTotal > 200 ? 0 : 5.00;
-  const subtotalAfterDiscount = cartTotal - appliedDiscount;
-  const total = subtotalAfterDiscount + shippingCost;
+  const shippingCost = cartTotal > 500 ? 0 : 20;
+  const total = cartTotal + shippingCost;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -43,15 +41,15 @@ export default function CheckoutPage() {
       status: "Procesando",
       items: cart,
       subtotal: cartTotal,
-      discount: appliedDiscount,
       shipping: shippingCost,
       total: total,
       customer: {
         fullName: formData.fullName,
         email: formData.email,
+        phone: formData.phone,
         address: formData.address,
         city: formData.city,
-        postalCode: formData.postalCode,
+        zone: formData.zone,
         country: formData.country,
       }
     };
@@ -71,20 +69,6 @@ export default function CheckoutPage() {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
-  };
-
-  const handleApplyDiscount = () => {
-    // Códigos de descuento de ejemplo
-    const discounts = {
-      "WELCOME10": 10,
-      "SAVE20": 20,
-    };
-    
-    if (discounts[discountCode.toUpperCase()]) {
-      setAppliedDiscount(discounts[discountCode.toUpperCase()]);
-    } else {
-      alert("Código de descuento inválido");
-    }
   };
 
   if (cart.length === 0) {
@@ -178,6 +162,21 @@ export default function CheckoutPage() {
                       placeholder="Ingresa tu nombre completo"
                     />
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Teléfono/Celular
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      required
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                      placeholder="Ej: 70123456 o 22123456"
+                    />
+                  </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -190,7 +189,7 @@ export default function CheckoutPage() {
                       value={formData.address}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
-                      placeholder="Calle Principal 123"
+                      placeholder="Ej: Av. 6 de Agosto #1234"
                     />
                   </div>
 
@@ -199,26 +198,38 @@ export default function CheckoutPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Ciudad
                       </label>
-                      <input
-                        type="text"
+                      <select
                         name="city"
                         required
                         value={formData.city}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
-                      />
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900"
+                      >
+                        <option value="">Selecciona tu ciudad</option>
+                        <option value="La Paz">La Paz</option>
+                        <option value="El Alto">El Alto</option>
+                        <option value="Santa Cruz">Santa Cruz</option>
+                        <option value="Cochabamba">Cochabamba</option>
+                        <option value="Oruro">Oruro</option>
+                        <option value="Potosí">Potosí</option>
+                        <option value="Tarija">Tarija</option>
+                        <option value="Sucre">Sucre</option>
+                        <option value="Trinidad">Trinidad</option>
+                        <option value="Cobija">Cobija</option>
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Código Postal
+                        Zona
                       </label>
                       <input
                         type="text"
-                        name="postalCode"
+                        name="zone"
                         required
-                        value={formData.postalCode}
+                        value={formData.zone}
                         onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                        placeholder="Ej: Sopocachi, Miraflores"
                       />
                     </div>
                   </div>
@@ -233,7 +244,8 @@ export default function CheckoutPage() {
                       required
                       value={formData.country}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent bg-gray-50 text-gray-900 placeholder:text-gray-400"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent bg-gray-50 text-gray-900"
+                      readOnly
                     />
                   </div>
 
@@ -334,56 +346,25 @@ export default function CheckoutPage() {
                       <p className="font-semibold text-gray-900 text-sm mb-1">{item.name}</p>
                       <p className="text-xs text-gray-600">Cant: {item.quantity}</p>
                     </div>
-                    <p className="font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-bold text-gray-900">Bs {(item.price * item.quantity).toFixed(2)}</p>
                   </div>
                 ))}
               </div>
 
-              {/* Discount Code */}
-              <div className="mb-6 pb-6 border-b border-gray-200">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={discountCode}
-                    onChange={(e) => setDiscountCode(e.target.value)}
-                    placeholder="Código de descuento"
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-sm text-gray-900 placeholder:text-gray-400"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleApplyDiscount}
-                    className="px-6 py-2 bg-indigo-100 text-indigo-700 rounded-lg font-medium hover:bg-indigo-200 transition-colors text-sm"
-                  >
-                    Aplicar
-                  </button>
-                </div>
-                {appliedDiscount > 0 && (
-                  <p className="text-sm text-green-600 mt-2">
-                    ✓ Descuento de ${appliedDiscount.toFixed(2)} aplicado!
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3 mb-6 pt-6 border-t border-gray-200">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-semibold text-gray-900">${cartTotal.toFixed(2)}</span>
+                  <span className="font-semibold text-gray-900">Bs {cartTotal.toFixed(2)}</span>
                 </div>
-                {appliedDiscount > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Descuento</span>
-                    <span className="font-semibold text-green-600">-${appliedDiscount.toFixed(2)}</span>
-                  </div>
-                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Envío</span>
                   <span className="font-semibold text-gray-900">
-                    {shippingCost === 0 ? "GRATIS" : `$${shippingCost.toFixed(2)}`}
+                    {shippingCost === 0 ? "GRATIS" : `Bs ${shippingCost.toFixed(2)}`}
                   </span>
                 </div>
                 <div className="border-t border-gray-200 pt-3 flex justify-between">
                   <span className="font-bold text-gray-900 text-lg">Total</span>
-                  <span className="font-bold text-gray-900 text-2xl">${total.toFixed(2)}</span>
+                  <span className="font-bold text-gray-900 text-2xl">Bs {total.toFixed(2)}</span>
                 </div>
               </div>
 

@@ -214,7 +214,7 @@ export default function AdminProductsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-bold text-gray-900">${product.price.toFixed(2)}</p>
+                      <p className="font-bold text-gray-900">Bs {product.price.toFixed(2)}</p>
                     </td>
                     <td className="px-6 py-4">
                       <button

@@ -202,7 +202,7 @@ export default function AdminInventoryPage() {
 
         <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg shadow-sm p-4 text-white">
           <p className="text-sm opacity-90">Valor Total</p>
-          <p className="text-2xl font-bold">${stats.totalValue.toFixed(2)}</p>
+          <p className="text-2xl font-bold">Bs {stats.totalValue.toFixed(2)}</p>
         </div>
       </div>
 
@@ -324,8 +324,8 @@ export default function AdminInventoryPage() {
                         />
                       </td>
                       <td className="px-6 py-4">
-                        <p className="font-bold text-gray-900">${value.toFixed(2)}</p>
-                        <p className="text-xs text-gray-600">${product.price}/ud</p>
+                        <p className="font-bold text-gray-900">Bs {value.toFixed(2)}</p>
+                        <p className="text-xs text-gray-600">Bs {product.price}/ud</p>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${stockStatus.color}`}>

@@ -87,9 +87,9 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="bg-gray-900 text-white w-64 min-h-screen flex flex-col">
+    <aside className="bg-gray-900 text-white w-64 h-screen flex flex-col fixed left-0 top-0">
       {/* Logo */}
-      <div className="p-6 border-b border-gray-800">
+      <div className="p-6 border-b border-gray-800 flex-shrink-0">
         <Link href="/admin/dashboard" className="flex items-center gap-3 group">
           <div className="bg-indigo-600 p-2 rounded-lg">
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -105,7 +105,7 @@ export default function AdminSidebar() {
 
       {/* User Info */}
       {currentUser && (
-        <div className="p-6 border-b border-gray-800">
+        <div className="p-6 border-b border-gray-800 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center">
               <span className="text-sm font-bold">{currentUser.fullName?.charAt(0)}</span>
@@ -119,7 +119,7 @@ export default function AdminSidebar() {
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -140,7 +140,7 @@ export default function AdminSidebar() {
       </nav>
 
       {/* Footer Actions */}
-      <div className="p-4 border-t border-gray-800 space-y-2">
+      <div className="p-4 border-t border-gray-800 space-y-2 flex-shrink-0">
         <Link
           href="/"
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"

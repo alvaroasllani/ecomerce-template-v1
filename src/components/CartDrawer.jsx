@@ -115,7 +115,7 @@ export default function CartDrawer() {
                       </p>
                     )}
                     <p className="font-bold text-gray-900">
-                      ${item.price.toFixed(2)}
+                      Bs {item.price.toFixed(2)}
                     </p>
                   </div>
 
@@ -171,7 +171,7 @@ export default function CartDrawer() {
             <div className="flex items-center justify-between">
               <span className="text-lg font-semibold text-gray-900">Subtotal</span>
               <span className="text-2xl font-bold text-gray-900">
-                ${cartTotal.toFixed(2)}
+                Bs {cartTotal.toFixed(2)}
               </span>
             </div>
             <p className="text-sm text-gray-600">

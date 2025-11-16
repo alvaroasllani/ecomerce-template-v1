@@ -142,7 +142,7 @@ export default function AdminOrdersPage() {
 
         <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg shadow-sm p-4 text-white">
           <p className="text-sm opacity-90">Ingresos</p>
-          <p className="text-2xl font-bold">${stats.revenue.toFixed(2)}</p>
+          <p className="text-2xl font-bold">Bs {stats.revenue.toFixed(2)}</p>
         </div>
       </div>
 
@@ -228,7 +228,7 @@ export default function AdminOrdersPage() {
                       </p>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-bold text-gray-900">${order.total.toFixed(2)}</p>
+                      <p className="font-bold text-gray-900">Bs {order.total.toFixed(2)}</p>
                     </td>
                     <td className="px-6 py-4">
                       <select
@@ -333,7 +333,7 @@ export default function AdminOrdersPage() {
                         <p className="font-semibold text-gray-900">{item.name}</p>
                         <p className="text-sm text-gray-600">Cantidad: {item.quantity}</p>
                       </div>
-                      <p className="font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="font-bold text-gray-900">Bs {(item.price * item.quantity).toFixed(2)}</p>
                     </div>
                   ))}
                 </div>
@@ -344,17 +344,17 @@ export default function AdminOrdersPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal:</span>
-                    <span className="font-semibold text-gray-900">${selectedOrder.subtotal.toFixed(2)}</span>
+                    <span className="font-semibold text-gray-900">Bs {selectedOrder.subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Envío:</span>
                     <span className="font-semibold text-gray-900">
-                      {selectedOrder.shipping === 0 ? "GRATIS" : `$${selectedOrder.shipping.toFixed(2)}`}
+                      {selectedOrder.shipping === 0 ? "GRATIS" : `Bs ${selectedOrder.shipping.toFixed(2)}`}
                     </span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
                     <span>Total:</span>
-                    <span className="text-indigo-600">${selectedOrder.total.toFixed(2)}</span>
+                    <span className="text-indigo-600">Bs {selectedOrder.total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
