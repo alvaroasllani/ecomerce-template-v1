@@ -36,13 +36,18 @@ export default function LoginPage() {
         id: user.id,
         fullName: user.fullName,
         email: user.email,
+        role: user.role, // Incluir el rol
         loggedIn: true,
       };
       localStorage.setItem("userSession", JSON.stringify(userSession));
       
-      // Redirigir al home
+      // Redirigir según el rol
       setTimeout(() => {
-        router.push("/");
+        if (user.role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/");
+        }
         setIsLoading(false);
       }, 500);
     } else {
@@ -155,8 +160,9 @@ export default function LoginPage() {
             {/* Demo Credentials */}
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-xs font-semibold text-blue-900 mb-1">Usuarios de prueba:</p>
-              <p className="text-xs text-blue-700">📧 juan@ejemplo.com / 🔑 123456</p>
-              <p className="text-xs text-blue-700">📧 demo@ejemplo.com / 🔑 demo123</p>
+              <p className="text-xs text-blue-700">👤 juan@ejemplo.com / 🔑 123456 (Cliente)</p>
+              <p className="text-xs text-blue-700">👤 demo@ejemplo.com / 🔑 demo123 (Cliente)</p>
+              <p className="text-xs text-red-700 font-semibold mt-1">🔐 admin@techstore.com / 🔑 admin123 (Admin)</p>
             </div>
           </form>
 

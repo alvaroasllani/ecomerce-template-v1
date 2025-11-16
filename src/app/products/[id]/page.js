@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { products, getProductById } from "@/data/products";
+import { products as initialProducts } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 
 export default function ProductDetailPage() {
@@ -14,9 +14,31 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState("description");
+  const [product, setProduct] = useState(null);
+  const [products, setProducts] = useState([]);
   const { addToCart } = useCart();
 
-  const product = getProductById(params.id);
+  // Cargar producto dinámico
+  useEffect(() => {
+    const customProducts = JSON.parse(localStorage.getItem("customProducts") || "[]");
+    const productsToUse = customProducts.length > 0 ? customProducts : initialProducts;
+    setProducts(productsToUse);
+    
+    const foundProduct = productsToUse.find(p => p.id === parseInt(params.id));
+    setProduct(foundProduct || null);
+  }, [params.id]);
+
+  // Mostrar loading mientras carga
+  if (product === null) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando producto...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (

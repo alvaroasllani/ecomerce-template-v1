@@ -18,24 +18,35 @@ export default function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Categorías para el dropdown
-  const categories = [
-    { name: "Teclados", slug: "keyboards" },
-    { name: "Ratones", slug: "mice" },
-    { name: "Alfombrillas", slug: "desk-mats" },
-    { name: "Cables", slug: "cables" },
-    { name: "Accesorios", slug: "accessories" },
-    { name: "Audio", slug: "audio" },
-    { name: "Almacenamiento", slug: "storage" },
-  ];
+  // Categorías dinámicas desde el admin
+  const [categories, setCategories] = useState([]);
 
-  // Verificar sesión al cargar
+  // Verificar sesión y cargar categorías al cargar
   useEffect(() => {
     const session = localStorage.getItem("userSession");
     if (session) {
       const userData = JSON.parse(session);
       setIsAuthenticated(true);
       setCurrentUser(userData);
+    }
+
+    // Cargar categorías desde localStorage
+    const savedCategories = JSON.parse(localStorage.getItem("customCategories") || "[]");
+    if (savedCategories.length > 0) {
+      setCategories(savedCategories);
+    } else {
+      // Categorías por defecto si no hay ninguna
+      const defaultCategories = [
+        { id: 1, name: "Teclados", slug: "keyboards" },
+        { id: 2, name: "Ratones", slug: "mice" },
+        { id: 3, name: "Alfombrillas", slug: "desk-mats" },
+        { id: 4, name: "Cables", slug: "cables" },
+        { id: 5, name: "Accesorios", slug: "accessories" },
+        { id: 6, name: "Audio", slug: "audio" },
+        { id: 7, name: "Almacenamiento", slug: "storage" },
+      ];
+      setCategories(defaultCategories);
+      localStorage.setItem("customCategories", JSON.stringify(defaultCategories));
     }
   }, []);
 
@@ -227,7 +238,28 @@ export default function Header() {
                   <div className="px-4 py-3 border-b border-gray-200">
                     <p className="text-sm font-semibold text-gray-900">{currentUser?.fullName}</p>
                     <p className="text-xs text-gray-600">{currentUser?.email}</p>
+                    {currentUser?.role === "admin" && (
+                      <span className="inline-block mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded">
+                        Administrador
+                      </span>
+                    )}
                   </div>
+                  
+                  {/* Panel Admin - Solo para admins */}
+                  {currentUser?.role === "admin" && (
+                    <Link
+                      href="/admin/dashboard"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="block px-4 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors font-semibold"
+                    >
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Panel Administrador
+                      </div>
+                    </Link>
+                  )}
                   
                   <Link
                     href="/account"

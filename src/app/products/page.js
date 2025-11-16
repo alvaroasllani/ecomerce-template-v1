@@ -5,20 +5,9 @@ import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { products } from "@/data/products";
+import { products as initialProducts } from "@/data/products";
 
 const ITEMS_PER_PAGE = 6;
-
-// Mapeo de slugs de URL a nombres de categorías en español
-const categorySlugToName = {
-  "keyboards": "Teclados",
-  "mice": "Ratones",
-  "desk-mats": "Alfombrillas",
-  "cables": "Cables",
-  "accessories": "Accesorios",
-  "audio": "Audio",
-  "storage": "Almacenamiento",
-};
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
@@ -30,29 +19,50 @@ export default function ProductsPage() {
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+
+  // Cargar productos, categorías y marcas dinámicas
+  useEffect(() => {
+    // Cargar productos (customizados o iniciales)
+    const customProducts = JSON.parse(localStorage.getItem("customProducts") || "[]");
+    setProducts(customProducts.length > 0 ? customProducts : initialProducts);
+
+    // Cargar categorías dinámicas
+    const savedCategories = JSON.parse(localStorage.getItem("customCategories") || "[]");
+    if (savedCategories.length > 0) {
+      setCategories(savedCategories.map(c => c.name));
+    } else {
+      // Extraer de productos si no hay guardadas
+      const cats = [...new Set(initialProducts.map(p => p.category))];
+      setCategories(cats);
+    }
+
+    // Cargar marcas dinámicas
+    const savedBrands = JSON.parse(localStorage.getItem("customBrands") || "[]");
+    if (savedBrands.length > 0) {
+      setBrands(savedBrands.map(b => b.name));
+    } else {
+      // Extraer de productos si no hay guardadas
+      const brds = [...new Set(initialProducts.map(p => p.brand))];
+      setBrands(brds);
+    }
+  }, []);
 
   // Aplicar categoría desde URL al cargar
   useEffect(() => {
-    if (categorySlug && categorySlugToName[categorySlug]) {
-      const categoryName = categorySlugToName[categorySlug];
-      setSelectedCategories([categoryName]);
+    if (categorySlug && categories.length > 0) {
+      // Buscar categoría por slug
+      const savedCategories = JSON.parse(localStorage.getItem("customCategories") || "[]");
+      const category = savedCategories.find(c => c.slug === categorySlug);
+      if (category) {
+        setSelectedCategories([category.name]);
+      }
     } else if (!categorySlug) {
-      // Si no hay categoría en la URL, limpiar selección (excepto si el usuario seleccionó manualmente)
-      // Solo limpiamos si venimos de un enlace sin categoría
       setSelectedCategories([]);
     }
-  }, [categorySlug]);
-
-  // Obtener categorías y marcas únicas
-  const categories = useMemo(() => {
-    const cats = [...new Set(products.map(p => p.category))];
-    return cats;
-  }, []);
-
-  const brands = useMemo(() => {
-    const brds = [...new Set(products.map(p => p.brand))];
-    return brds;
-  }, []);
+  }, [categorySlug, categories]);
 
   // Filtrar productos
   const filteredProducts = useMemo(() => {

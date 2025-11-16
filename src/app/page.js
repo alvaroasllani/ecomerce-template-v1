@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -5,7 +8,19 @@ import ProductCard from "@/components/ProductCard";
 import { getFeaturedProducts } from "@/data/products";
 
 export default function Home() {
-  const featuredProducts = getFeaturedProducts();
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+
+  useEffect(() => {
+    // Cargar productos dinámicos o usar los iniciales
+    const customProducts = JSON.parse(localStorage.getItem("customProducts") || "[]");
+    if (customProducts.length > 0) {
+      // Filtrar solo los destacados
+      const featured = customProducts.filter(p => p.featured);
+      setFeaturedProducts(featured.length > 0 ? featured : customProducts.slice(0, 4));
+    } else {
+      setFeaturedProducts(getFeaturedProducts());
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">

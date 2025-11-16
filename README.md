@@ -42,12 +42,22 @@ ecommerce-app/
 │   │   ├── contact/                # Formulario de contacto
 │   │   ├── login/                  # Inicio de sesión
 │   │   ├── signup/                 # Registro
-│   │   └── about/                  # Acerca de nosotros
+│   │   ├── about/                  # Acerca de nosotros
+│   │   └── admin/                  # Panel de administración
+│   │       ├── layout.js           # Layout protegido
+│   │       ├── dashboard/          # Dashboard con métricas
+│   │       ├── products/           # CRUD de productos
+│   │       │   ├── page.js
+│   │       │   ├── new/            # Crear producto
+│   │       │   └── edit/[id]/      # Editar producto
+│   │       ├── orders/             # Gestión de pedidos
+│   │       └── inventory/          # Control de stock
 │   ├── components/
 │   │   ├── Header.jsx              # Navegación principal
 │   │   ├── Footer.jsx              # Pie de página
 │   │   ├── ProductCard.jsx         # Tarjeta de producto
-│   │   └── CartDrawer.jsx          # Vista rápida del carrito
+│   │   ├── CartDrawer.jsx          # Vista rápida del carrito
+│   │   └── AdminSidebar.jsx        # Barra lateral admin
 │   ├── context/
 │   │   └── CartContext.jsx         # Gestión global del carrito
 │   └── data/
@@ -58,13 +68,65 @@ ecommerce-app/
 
 ## Funcionalidades Principales
 
+### Panel de Administración
+
+Sistema completo de administración con autenticación por roles:
+
+**Acceso:**
+
+- Email: `admin@techstore.com`
+- Contraseña: `admin123`
+
+**Dashboard:**
+
+- Métricas en tiempo real (ventas, pedidos, productos, stock)
+- Ingresos totales y del día
+- Productos más vendidos
+- Pedidos recientes
+- Alertas de stock bajo
+- Accesos rápidos a funciones principales
+
+**Gestión de Productos (CRUD):**
+
+- Listar todos los productos con filtros y búsqueda
+- Crear nuevos productos con formulario completo
+- Editar productos existentes
+- Eliminar productos con confirmación
+- Toggle de disponibilidad (En Stock / Sin Stock)
+- Gestión de categorías, marcas, precios y colores
+- Vista previa en la tienda
+
+**Gestión de Pedidos:**
+
+- Lista completa de pedidos con filtros por estado
+- Cambio de estado (Procesando → Enviado → Entregado → Cancelado)
+- Vista detallada de cada pedido
+- Información completa del cliente y dirección de envío
+- Resumen de productos y totales
+- Estadísticas por estado
+- Búsqueda por número de pedido, nombre o email
+
+**Control de Inventario:**
+
+- Gestión de stock en tiempo real
+- Actualización de cantidad disponible
+- Configuración de stock mínimo por producto
+- Ajustes rápidos (+10 / -10 unidades)
+- Alertas automáticas de stock bajo
+- Alertas de productos sin stock
+- Filtros por estado de inventario
+- Valor total del inventario
+
 ### Autenticación
 
-- Sistema de login y registro
+- Sistema de login y registro de usuarios
 - Validación de credenciales
-- Sesión persistente en localStorage
-- Usuarios de ejemplo para pruebas
+- Persistencia de sesión con localStorage
+- **Sistema de roles** (customer / admin)
+- Redirección automática según rol
+- Menú de usuario dinámico (login/logout)
 - Protección de rutas (Mi Cuenta requiere autenticación)
+- Protección del panel admin (requiere rol de administrador)
 
 ### Navegación
 
@@ -129,13 +191,22 @@ Sistema completo de gestión de perfil con 6 secciones:
 - Enlaces a redes sociales
 - Validación de campos
 
-## Usuarios de Ejemplo
+## Usuarios de Prueba
 
-Para probar el sistema de autenticación:
+### Administrador:
+
+```
+Email: admin@techstore.com
+Contraseña: admin123
+Rol: admin
+```
+
+### Clientes:
 
 ```
 Email: juan@ejemplo.com
 Contraseña: 123456
+Rol: customer
 
 Email: demo@ejemplo.com
 Contraseña: demo123
@@ -157,6 +228,12 @@ La aplicación utiliza localStorage del navegador:
 ```javascript
 // Carrito
 localStorage.getItem("cart");
+
+// Productos personalizados (CRUD admin)
+localStorage.getItem("customProducts");
+
+// Inventario
+localStorage.getItem("adminInventory");
 
 // Pedidos
 localStorage.getItem("orders");

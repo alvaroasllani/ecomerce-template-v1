@@ -40,15 +40,15 @@ export default function CheckoutPage() {
     const order = {
       orderNumber: orderNumber,
       date: new Date().toISOString(),
-      status: "Processing",
+      status: "Procesando",
       items: cart,
       subtotal: cartTotal,
       discount: appliedDiscount,
       shipping: shippingCost,
       total: total,
-      email: formData.email,
-      shippingAddress: {
+      customer: {
         fullName: formData.fullName,
+        email: formData.email,
         address: formData.address,
         city: formData.city,
         postalCode: formData.postalCode,
