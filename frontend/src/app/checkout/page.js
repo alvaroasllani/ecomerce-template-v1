@@ -1,0 +1,392 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { useCart } from "@/context/CartContext";
+
+export default function CheckoutPage() {
+  const router = useRouter();
+  const { cart, cartTotal } = useCart();
+  
+  const [formData, setFormData] = useState({
+    email: "",
+    fullName: "",
+    phone: "",
+    address: "",
+    city: "",
+    zone: "",
+    country: "Bolivia",
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    saveInfo: false,
+  });
+
+  const shippingCost = cartTotal > 500 ? 0 : 20;
+  const total = cartTotal + shippingCost;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    // Generar número de orden aleatorio
+    const orderNumber = Math.floor(100000000 + Math.random() * 900000000);
+    
+    // Crear objeto de pedido
+    const order = {
+      orderNumber: orderNumber,
+      date: new Date().toISOString(),
+      status: "Procesando",
+      items: cart,
+      subtotal: cartTotal,
+      shipping: shippingCost,
+      total: total,
+      customer: {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        zone: formData.zone,
+        country: formData.country,
+      }
+    };
+    
+    // Guardar pedido en localStorage
+    const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+    existingOrders.push(order);
+    localStorage.setItem("orders", JSON.stringify(existingOrders));
+    
+    // Redirigir a confirmación
+    router.push(`/checkout/confirmation?order=${orderNumber}`);
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
+
+  if (cart.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <svg
+            className="w-24 h-24 text-gray-300 mx-auto mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+            />
+          </svg>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Tu carrito está vacío</h1>
+          <p className="text-gray-600 mb-8">Agrega algunos productos antes de finalizar la compra.</p>
+          <button
+            onClick={() => router.push("/products")}
+            className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+          >
+            Seguir Comprando
+          </button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <nav className="flex items-center space-x-2 text-sm mb-8">
+          <Link href="/orders" className="text-indigo-600 hover:text-indigo-700">
+            Mis Pedidos
+          </Link>
+          <span className="text-gray-400">/</span>
+          <span className="font-semibold text-gray-900">Checkout</span>
+          <span className="text-gray-400">/</span>
+          <span className="text-gray-400">Confirmación</span>
+        </nav>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Checkout Form */}
+          <div className="lg:col-span-2">
+            <h1 className="text-4xl font-bold text-gray-900 mb-8">Finalizar Compra</h1>
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Contact */}
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Contacto</h2>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Correo Electrónico
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                    placeholder="tu@ejemplo.com"
+                  />
+                </div>
+              </div>
+
+              {/* Shipping Address */}
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Dirección de Envío</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nombre Completo
+                    </label>
+                    <input
+                      type="text"
+                      name="fullName"
+                      required
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                      placeholder="Ingresa tu nombre completo"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Teléfono/Celular
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      required
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                      placeholder="Ej: 70123456 o 22123456"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Dirección
+                    </label>
+                    <input
+                      type="text"
+                      name="address"
+                      required
+                      value={formData.address}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                      placeholder="Ej: Av. 6 de Agosto #1234"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Ciudad
+                      </label>
+                      <select
+                        name="city"
+                        required
+                        value={formData.city}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900"
+                      >
+                        <option value="">Selecciona tu ciudad</option>
+                        <option value="La Paz">La Paz</option>
+                        <option value="El Alto">El Alto</option>
+                        <option value="Santa Cruz">Santa Cruz</option>
+                        <option value="Cochabamba">Cochabamba</option>
+                        <option value="Oruro">Oruro</option>
+                        <option value="Potosí">Potosí</option>
+                        <option value="Tarija">Tarija</option>
+                        <option value="Sucre">Sucre</option>
+                        <option value="Trinidad">Trinidad</option>
+                        <option value="Cobija">Cobija</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Zona
+                      </label>
+                      <input
+                        type="text"
+                        name="zone"
+                        required
+                        value={formData.zone}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                        placeholder="Ej: Sopocachi, Miraflores"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      País
+                    </label>
+                    <input
+                      type="text"
+                      name="country"
+                      required
+                      value={formData.country}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent bg-gray-50 text-gray-900"
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name="saveInfo"
+                      checked={formData.saveInfo}
+                      onChange={handleChange}
+                      className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-600"
+                    />
+                    <label className="ml-2 text-sm text-gray-700">
+                      Guardar esta información para la próxima vez
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment */}
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Pago</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Número de Tarjeta
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="cardNumber"
+                        required
+                        value={formData.cardNumber}
+                        onChange={handleChange}
+                        placeholder="0000 0000 0000 0000"
+                        maxLength="19"
+                        className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                      />
+                      <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="2" y="5" width="20" height="14" rx="2" strokeWidth="2"/>
+                        <path d="M2 10h20" strokeWidth="2"/>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Fecha de Vencimiento
+                      </label>
+                      <input
+                        type="text"
+                        name="expiryDate"
+                        required
+                        value={formData.expiryDate}
+                        onChange={handleChange}
+                        placeholder="MM / AA"
+                        maxLength="7"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        CVV
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                          <path d="M12 16v-4M12 8h.01" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      </label>
+                      <input
+                        type="text"
+                        name="cvv"
+                        required
+                        value={formData.cvv}
+                        onChange={handleChange}
+                        placeholder="123"
+                        maxLength="4"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* Order Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 sticky top-24">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Tu Pedido</h2>
+              
+              <div className="space-y-4 mb-6">
+                {cart.map((item) => (
+                  <div key={`${item.id}-${item.color}`} className="flex gap-4">
+                    <div className={`${item.bgColor} w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                      <div className="w-8 h-8 bg-white/20 rounded"></div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm mb-1">{item.name}</p>
+                      <p className="text-xs text-gray-600">Cant: {item.quantity}</p>
+                    </div>
+                    <p className="font-bold text-gray-900">Bs {(item.price * item.quantity).toFixed(2)}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-3 mb-6 pt-6 border-t border-gray-200">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="font-semibold text-gray-900">Bs {cartTotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Envío</span>
+                  <span className="font-semibold text-gray-900">
+                    {shippingCost === 0 ? "GRATIS" : `Bs ${shippingCost.toFixed(2)}`}
+                  </span>
+                </div>
+                <div className="border-t border-gray-200 pt-3 flex justify-between">
+                  <span className="font-bold text-gray-900 text-lg">Total</span>
+                  <span className="font-bold text-gray-900 text-2xl">Bs {total.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={handleSubmit}
+                className="w-full bg-indigo-600 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg mb-4"
+              >
+                Completar Pedido
+              </button>
+
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span>Tu pago es seguro y encriptado.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Footer />
+    </div>
+  );
+}
