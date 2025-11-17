@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de Usuario
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  fullName  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  orders    Order[]
+  
+  @@map("users")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+// Modelo de Categoría
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  products  Product[]
+  
+  @@map("categories")
+}
+
+// Modelo de Marca
+model Brand {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  products  Product[]
+  
+  @@map("brands")
+}
+
+// Modelo de Producto
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  image       String?
+  bgColor     String?  @default("bg-gray-200")
+  featured    Boolean  @default(false)
+  inStock     Boolean  @default(true)
+  rating      Float?   @default(0)
+  reviews     Int?     @default(0)
+  
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+  
+  brandId     Int
+  brand       Brand    @relation(fields: [brandId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  orderItems  OrderItem[]
+  
+  @@map("products")
+}
+
+// Modelo de Orden/Pedido
+model Order {
+  id              Int         @id @default(autoincrement())
+  orderNumber     String      @unique
+  status          OrderStatus @default(PENDING)
+  
+  userId          Int
+  user            User        @relation(fields: [userId], references: [id])
+  
+  // Información de envío
+  shippingName    String
+  shippingEmail   String
+  shippingAddress String
+  shippingCity    String
+  shippingZip     String
+  shippingCountry String
+  
+  // Totales
+  subtotal        Float
+  shipping        Float       @default(0)
+  total           Float
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  orderItems      OrderItem[]
+  
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+// Modelo de Item de Orden
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  quantity  Int
+  price     Float
+  
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  
+  createdAt DateTime @default(now())
+  
+  @@map("order_items")
+}
+
