@@ -1,0 +1,496 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "E-commerce API",
+  "dateExported": "2024-11-17",
+  "version": "1.1",
+  "folders": [
+    {
+      "name": "Auth",
+      "requests": [
+        {
+          "name": "Register",
+          "method": "POST",
+          "url": "http://localhost:3001/api/auth/register",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"email\": \"test@ejemplo.com\",\n  \"password\": \"password123\",\n  \"fullName\": \"Usuario Test\"\n}"
+          }
+        },
+        {
+          "name": "Login",
+          "method": "POST",
+          "url": "http://localhost:3001/api/auth/login",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"email\": \"demo@ejemplo.com\",\n  \"password\": \"demo123\"\n}"
+          }
+        },
+        {
+          "name": "Login Admin",
+          "method": "POST",
+          "url": "http://localhost:3001/api/auth/login",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"email\": \"admin@techstore.com\",\n  \"password\": \"admin123\"\n}"
+          }
+        },
+        {
+          "name": "Get Profile",
+          "method": "GET",
+          "url": "http://localhost:3001/api/auth/profile",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{token}}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "requests": [
+        {
+          "name": "Get All Products",
+          "method": "GET",
+          "url": "http://localhost:3001/api/products"
+        },
+        {
+          "name": "Get Featured Products",
+          "method": "GET",
+          "url": "http://localhost:3001/api/products/featured"
+        },
+        {
+          "name": "Get Product by ID",
+          "method": "GET",
+          "url": "http://localhost:3001/api/products/1"
+        },
+        {
+          "name": "Search Products",
+          "method": "GET",
+          "url": "http://localhost:3001/api/products?search=teclado"
+        },
+        {
+          "name": "Filter by Category",
+          "method": "GET",
+          "url": "http://localhost:3001/api/products?categoryId=1"
+        },
+        {
+          "name": "Filter by Brand",
+          "method": "GET",
+          "url": "http://localhost:3001/api/products?brandId=2"
+        },
+        {
+          "name": "Create Product (Admin)",
+          "method": "POST",
+          "url": "http://localhost:3001/api/products",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"name\": \"Nuevo Producto\",\n  \"description\": \"Descripción del producto\",\n  \"price\": 99.99,\n  \"categoryId\": 1,\n  \"brandId\": 2,\n  \"image\": \"/products/nuevo.jpg\",\n  \"bgColor\": \"bg-blue-500\",\n  \"featured\": false,\n  \"inStock\": true,\n  \"rating\": 4.5,\n  \"reviews\": 0\n}"
+          }
+        },
+        {
+          "name": "Update Product (Admin)",
+          "method": "PATCH",
+          "url": "http://localhost:3001/api/products/1",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"price\": 89.99,\n  \"inStock\": false\n}"
+          }
+        },
+        {
+          "name": "Update Stock (Admin)",
+          "method": "PATCH",
+          "url": "http://localhost:3001/api/products/1/stock",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"inStock\": true\n}"
+          }
+        },
+        {
+          "name": "Delete Product (Admin)",
+          "method": "DELETE",
+          "url": "http://localhost:3001/api/products/1",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "requests": [
+        {
+          "name": "Get All Categories",
+          "method": "GET",
+          "url": "http://localhost:3001/api/categories"
+        },
+        {
+          "name": "Get Category by ID",
+          "method": "GET",
+          "url": "http://localhost:3001/api/categories/1"
+        },
+        {
+          "name": "Get Category by Slug",
+          "method": "GET",
+          "url": "http://localhost:3001/api/categories/slug/keyboards"
+        },
+        {
+          "name": "Create Category (Admin)",
+          "method": "POST",
+          "url": "http://localhost:3001/api/categories",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"name\": \"Nueva Categoría\",\n  \"slug\": \"nueva-categoria\"\n}"
+          }
+        },
+        {
+          "name": "Update Category (Admin)",
+          "method": "PATCH",
+          "url": "http://localhost:3001/api/categories/1",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"name\": \"Categoría Actualizada\"\n}"
+          }
+        },
+        {
+          "name": "Delete Category (Admin)",
+          "method": "DELETE",
+          "url": "http://localhost:3001/api/categories/1",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Brands",
+      "requests": [
+        {
+          "name": "Get All Brands",
+          "method": "GET",
+          "url": "http://localhost:3001/api/brands"
+        },
+        {
+          "name": "Get Brand by ID",
+          "method": "GET",
+          "url": "http://localhost:3001/api/brands/1"
+        },
+        {
+          "name": "Get Brand by Slug",
+          "method": "GET",
+          "url": "http://localhost:3001/api/brands/slug/aero"
+        },
+        {
+          "name": "Create Brand (Admin)",
+          "method": "POST",
+          "url": "http://localhost:3001/api/brands",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"name\": \"Nueva Marca\",\n  \"slug\": \"nueva-marca\"\n}"
+          }
+        },
+        {
+          "name": "Update Brand (Admin)",
+          "method": "PATCH",
+          "url": "http://localhost:3001/api/brands/1",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"name\": \"Marca Actualizada\"\n}"
+          }
+        },
+        {
+          "name": "Delete Brand (Admin)",
+          "method": "DELETE",
+          "url": "http://localhost:3001/api/brands/1",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "requests": [
+        {
+          "name": "Create Order",
+          "method": "POST",
+          "url": "http://localhost:3001/api/orders",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{token}}"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"items\": [\n    { \"productId\": 1, \"quantity\": 2 },\n    { \"productId\": 3, \"quantity\": 1 }\n  ],\n  \"shippingName\": \"Juan Pérez\",\n  \"shippingEmail\": \"juan@ejemplo.com\",\n  \"shippingAddress\": \"Calle Principal 123\",\n  \"shippingCity\": \"Ciudad\",\n  \"shippingZip\": \"12345\",\n  \"shippingCountry\": \"México\",\n  \"shipping\": 15.00\n}"
+          }
+        },
+        {
+          "name": "Get My Orders",
+          "method": "GET",
+          "url": "http://localhost:3001/api/orders/my-orders",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{token}}"
+            }
+          ]
+        },
+        {
+          "name": "Get Order by ID",
+          "method": "GET",
+          "url": "http://localhost:3001/api/orders/1",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{token}}"
+            }
+          ]
+        },
+        {
+          "name": "Get Order by Number",
+          "method": "GET",
+          "url": "http://localhost:3001/api/orders/number/ORD-1234567890-ABC",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{token}}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Orders (Admin)",
+          "method": "GET",
+          "url": "http://localhost:3001/api/orders",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ]
+        },
+        {
+          "name": "Get Order Stats (Admin)",
+          "method": "GET",
+          "url": "http://localhost:3001/api/orders/stats",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ]
+        },
+        {
+          "name": "Update Order Status (Admin)",
+          "method": "PATCH",
+          "url": "http://localhost:3001/api/orders/1/status",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"status\": \"SHIPPED\"\n}"
+          }
+        },
+        {
+          "name": "Delete Order (Admin)",
+          "method": "DELETE",
+          "url": "http://localhost:3001/api/orders/1",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "requests": [
+        {
+          "name": "Get All Users (Admin)",
+          "method": "GET",
+          "url": "http://localhost:3001/api/users",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ]
+        },
+        {
+          "name": "Get User by ID",
+          "method": "GET",
+          "url": "http://localhost:3001/api/users/1",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{token}}"
+            }
+          ]
+        },
+        {
+          "name": "Update User",
+          "method": "PATCH",
+          "url": "http://localhost:3001/api/users/1",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{token}}"
+            }
+          ],
+          "body": {
+            "type": "json",
+            "raw": "{\n  \"fullName\": \"Nombre Actualizado\"\n}"
+          }
+        },
+        {
+          "name": "Delete User (Admin)",
+          "method": "DELETE",
+          "url": "http://localhost:3001/api/users/1",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{adminToken}}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "requests": [
+        {
+          "name": "Root",
+          "method": "GET",
+          "url": "http://localhost:3001/api"
+        },
+        {
+          "name": "Health Check",
+          "method": "GET",
+          "url": "http://localhost:3001/api/health"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "headers": [],
+    "tests": []
+  }
+}
+
