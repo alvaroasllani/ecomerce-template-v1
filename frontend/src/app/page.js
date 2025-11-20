@@ -5,21 +5,27 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { getFeaturedProducts } from "@/data/products";
+import { getProducts } from "@/lib/api";
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Cargar productos dinámicos o usar los iniciales
-    const customProducts = JSON.parse(localStorage.getItem("customProducts") || "[]");
-    if (customProducts.length > 0) {
-      // Filtrar solo los destacados
-      const featured = customProducts.filter(p => p.featured);
-      setFeaturedProducts(featured.length > 0 ? featured : customProducts.slice(0, 4));
-    } else {
-      setFeaturedProducts(getFeaturedProducts());
+    async function loadProducts() {
+      try {
+        const products = await getProducts();
+        // Filtrar solo los destacados
+        const featured = products.filter(p => p.featured);
+        setFeaturedProducts(featured.length > 0 ? featured : products.slice(0, 4));
+      } catch (error) {
+        console.error("Error loading products:", error);
+      } finally {
+        setLoading(false);
+      }
     }
+
+    loadProducts();
   }, []);
 
   return (
@@ -42,7 +48,7 @@ export default function Home() {
               </button>
             </Link>
           </div>
-          
+
           <div className="relative h-96 rounded-3xl overflow-hidden bg-gradient-to-br from-teal-700 via-amber-200 to-orange-600 shadow-2xl">
             <div className="absolute inset-0 opacity-50 mix-blend-overlay bg-[radial-gradient(circle_at_30%_20%,_rgba(255,255,255,0.3)_0%,_transparent_50%)]"></div>
             <div className="absolute top-8 left-8 w-24 h-24 bg-teal-900 rounded-full opacity-70"></div>
@@ -57,11 +63,28 @@ export default function Home() {
         <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
           Destacados de la Semana
         </h2>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {loading ? (
+            // Loading Skeleton / Spinner
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
+                <div className="h-64 bg-gray-200"></div>
+                <div className="p-6 space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="flex justify-between items-center pt-4">
+                    <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+                    <div className="h-8 bg-gray-200 rounded w-8"></div>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          )}
         </div>
 
         <div className="text-center mt-12">

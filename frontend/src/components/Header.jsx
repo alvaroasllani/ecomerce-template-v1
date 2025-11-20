@@ -13,7 +13,7 @@ export default function Header() {
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const { setIsCartOpen, cartItemsCount } = useCart();
   const router = useRouter();
-  
+
   // Estado de autenticación
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -88,7 +88,7 @@ export default function Header() {
             </svg>
             <span className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">Tech Accessories</span>
           </Link>
-          
+
           <nav className="hidden lg:flex items-center space-x-6">
             {/* Inicio */}
             <Link href="/" className="text-gray-700 hover:text-indigo-600 transition-colors font-medium relative group">
@@ -162,20 +162,20 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 text-gray-700 hover:text-indigo-600 transition-all hover:scale-110 hover:rotate-12" 
+              className="p-2 text-gray-700 hover:text-indigo-600 transition-all hover:scale-110 hover:rotate-12"
               aria-label="Search"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </button>
-            
+
             {/* Vista Rápida del Carrito */}
-            <button 
+            <button
               onClick={() => setIsCartOpen(true)}
-              className="p-2 text-gray-700 hover:text-indigo-600 transition-all hover:scale-110 hover:-rotate-6 relative" 
+              className="p-2 text-gray-700 hover:text-indigo-600 transition-all hover:scale-110 hover:-rotate-6 relative"
               aria-label="Vista rápida del carrito"
               title="Vista rápida del carrito"
             >
@@ -188,12 +188,12 @@ export default function Header() {
                 </span>
               )}
             </button>
-            
+
             {/* User Menu */}
             <div className="hidden md:block relative user-menu-container">
-              <button 
+              <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="p-2 text-gray-700 hover:text-indigo-600 transition-all hover:scale-110 hover:rotate-6" 
+                className="p-2 text-gray-700 hover:text-indigo-600 transition-all hover:scale-110 hover:rotate-6"
                 aria-label="User account"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,7 +244,7 @@ export default function Header() {
                       </span>
                     )}
                   </div>
-                  
+
                   {/* Panel Admin - Solo para admins */}
                   {currentUser?.role === "admin" && (
                     <Link
@@ -260,7 +260,7 @@ export default function Header() {
                       </div>
                     </Link>
                   )}
-                  
+
                   <Link
                     href="/account"
                     onClick={() => setUserMenuOpen(false)}
@@ -288,11 +288,34 @@ export default function Header() {
                   <div className="border-t border-gray-200 my-1"></div>
                   <button
                     onClick={() => {
-                      localStorage.removeItem("userSession");
-                      setIsAuthenticated(false);
-                      setCurrentUser(null);
-                      setUserMenuOpen(false);
-                      router.push("/");
+                      // Mostrar animación de salida
+                      const notification = document.createElement('div');
+                      notification.className = 'fixed inset-0 flex items-center justify-center z-[100] bg-black/50 backdrop-blur-sm animate-fade-in';
+                      notification.innerHTML = `
+                        <div class="bg-white rounded-2xl p-8 shadow-2xl transform transition-all scale-100 animate-bounce-in text-center">
+                          <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <h3 class="text-xl font-bold text-gray-900 mb-2">¡Hasta pronto!</h3>
+                          <p class="text-gray-600">Esperamos verte de nuevo.</p>
+                        </div>
+                      `;
+                      document.body.appendChild(notification);
+
+                      setTimeout(() => {
+                        localStorage.removeItem("userSession");
+                        setIsAuthenticated(false);
+                        setCurrentUser(null);
+                        setUserMenuOpen(false);
+                        router.push("/");
+
+                        // Remover notificación
+                        setTimeout(() => {
+                          document.body.removeChild(notification);
+                        }, 500);
+                      }, 1500);
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                   >
@@ -306,7 +329,7 @@ export default function Header() {
                 </div>
               )}
             </div>
-            
+
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -330,7 +353,7 @@ export default function Header() {
         {searchOpen && (
           <div className="absolute top-full left-0 right-0 bg-white border-t border-gray-200 shadow-lg animate-fade-in">
             <div className="max-w-3xl mx-auto px-4 py-4">
-              <form 
+              <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (searchQuery.trim()) {
@@ -349,10 +372,10 @@ export default function Header() {
                   autoFocus
                   className="w-full px-4 py-3 pl-12 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder-gray-500"
                 />
-                <svg 
+                <svg
                   className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
-                  fill="none" 
-                  stroke="currentColor" 
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

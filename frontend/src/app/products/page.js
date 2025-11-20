@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { products as initialProducts } from "@/data/products";
+import { getProducts, getCategories, getBrands } from "@/lib/api";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -13,136 +13,106 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
   const categorySlug = searchParams.get("category") || "";
-  
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedBrands, setSelectedBrands] = useState([]);
+
+  const [selectedCategories, setSelectedCategories] = useState([]); // Array of IDs
+  const [selectedBrands, setSelectedBrands] = useState([]); // Array of IDs
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]); // Array of objects {id, name, slug}
+  const [brands, setBrands] = useState([]); // Array of objects {id, name}
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Cargar productos, categorías y marcas dinámicas
+  // Cargar categorías y marcas al inicio
   useEffect(() => {
-    // Cargar productos (customizados o iniciales)
-    const customProducts = JSON.parse(localStorage.getItem("customProducts") || "[]");
-    setProducts(customProducts.length > 0 ? customProducts : initialProducts);
-
-    // Cargar categorías dinámicas
-    const savedCategories = JSON.parse(localStorage.getItem("customCategories") || "[]");
-    if (savedCategories.length > 0) {
-      setCategories(savedCategories.map(c => c.name));
-    } else {
-      // Extraer de productos si no hay guardadas
-      const cats = [...new Set(initialProducts.map(p => p.category))];
-      setCategories(cats);
+    async function loadFilters() {
+      try {
+        const [cats, brds] = await Promise.all([
+          getCategories(),
+          getBrands()
+        ]);
+        setCategories(cats);
+        setBrands(brds);
+      } catch (error) {
+        console.error("Error loading filters:", error);
+      }
     }
-
-    // Cargar marcas dinámicas
-    const savedBrands = JSON.parse(localStorage.getItem("customBrands") || "[]");
-    if (savedBrands.length > 0) {
-      setBrands(savedBrands.map(b => b.name));
-    } else {
-      // Extraer de productos si no hay guardadas
-      const brds = [...new Set(initialProducts.map(p => p.brand))];
-      setBrands(brds);
-    }
+    loadFilters();
   }, []);
 
   // Aplicar categoría desde URL al cargar
   useEffect(() => {
     if (categorySlug && categories.length > 0) {
-      // Buscar categoría por slug
-      const savedCategories = JSON.parse(localStorage.getItem("customCategories") || "[]");
-      const category = savedCategories.find(c => c.slug === categorySlug);
+      const category = categories.find(c => c.slug === categorySlug);
       if (category) {
-        setSelectedCategories([category.name]);
+        setSelectedCategories([category.id]);
       }
     } else if (!categorySlug) {
       setSelectedCategories([]);
     }
   }, [categorySlug, categories]);
 
-  // Filtrar productos
-  const filteredProducts = useMemo(() => {
-    let filtered = products;
+  // Cargar productos cuando cambian los filtros
+  useEffect(() => {
+    async function loadProducts() {
+      setIsLoading(true);
+      try {
+        const filters = {
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+          sort: sortBy,
+          minPrice: priceRange[0],
+          maxPrice: priceRange[1],
+          search: searchQuery,
+        };
 
-    // Filtro por búsqueda
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(query) ||
-        p.description.toLowerCase().includes(query) ||
-        p.category.toLowerCase().includes(query) ||
-        p.brand.toLowerCase().includes(query)
-      );
+        if (selectedCategories.length > 0) filters.categoryId = selectedCategories[0];
+        if (selectedBrands.length > 0) filters.brandId = selectedBrands[0];
+
+        const response = await getProducts(filters);
+        setProducts(response.data);
+        setTotalProducts(response.meta.total);
+      } catch (error) {
+        console.error("Error loading products:", error);
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
     }
 
-    // Filtro por categoría
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter(p => selectedCategories.includes(p.category));
-    }
+    const timeoutId = setTimeout(() => {
+      loadProducts();
+    }, 300);
 
-    // Filtro por marca
-    if (selectedBrands.length > 0) {
-      filtered = filtered.filter(p => selectedBrands.includes(p.brand));
-    }
-
-    // Filtro por precio
-    filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
-
-    return filtered;
-  }, [searchQuery, selectedCategories, selectedBrands, priceRange]);
-
-  // Ordenar productos
-  const sortedProducts = useMemo(() => {
-    const sorted = [...filteredProducts];
-    
-    switch (sortBy) {
-      case "price-low":
-        return sorted.sort((a, b) => a.price - b.price);
-      case "price-high":
-        return sorted.sort((a, b) => b.price - a.price);
-      case "rating":
-        return sorted.sort((a, b) => b.rating - a.rating);
-      case "newest":
-      default:
-        return sorted;
-    }
-  }, [filteredProducts, sortBy]);
-
-  // Paginación
-  const totalPages = Math.ceil(sortedProducts.length / ITEMS_PER_PAGE);
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return sortedProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [sortedProducts, currentPage]);
+    return () => clearTimeout(timeoutId);
+  }, [currentPage, sortBy, priceRange, searchQuery, selectedCategories, selectedBrands]);
 
   // Handlers
-  const toggleCategory = (category) => {
-    setSelectedCategories(prev => 
-      prev.includes(category) 
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
+  const toggleCategory = (categoryId) => {
+    setSelectedCategories(prev =>
+      prev.includes(categoryId)
+        ? prev.filter(id => id !== categoryId)
+        : [categoryId]
     );
     setCurrentPage(1);
   };
 
-  const toggleBrand = (brand) => {
-    setSelectedBrands(prev => 
-      prev.includes(brand) 
-        ? prev.filter(b => b !== brand)
-        : [...prev, brand]
+  const toggleBrand = (brandId) => {
+    setSelectedBrands(prev =>
+      prev.includes(brandId)
+        ? prev.filter(id => id !== brandId)
+        : [brandId]
     );
     setCurrentPage(1);
   };
 
   const removeFilter = (type, value) => {
     if (type === "category") {
-      setSelectedCategories(prev => prev.filter(c => c !== value));
+      setSelectedCategories(prev => prev.filter(id => id !== value));
     } else if (type === "brand") {
-      setSelectedBrands(prev => prev.filter(b => b !== value));
+      setSelectedBrands(prev => prev.filter(id => id !== value));
     }
     setCurrentPage(1);
   };
@@ -154,8 +124,10 @@ function ProductsContent() {
     setCurrentPage(1);
   };
 
-  const hasActiveFilters = selectedCategories.length > 0 || selectedBrands.length > 0 || 
-                          priceRange[0] !== 0 || priceRange[1] !== 500;
+  const hasActiveFilters = selectedCategories.length > 0 || selectedBrands.length > 0 ||
+    priceRange[0] !== 0 || priceRange[1] !== 500;
+
+  const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -169,7 +141,7 @@ function ProductsContent() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Filtros</h2>
                 {hasActiveFilters && (
-                  <button 
+                  <button
                     onClick={clearAllFilters}
                     className="text-sm text-indigo-600 hover:text-indigo-700"
                   >
@@ -183,15 +155,15 @@ function ProductsContent() {
                 <h3 className="font-semibold text-gray-900 mb-3">Categoría</h3>
                 <div className="space-y-2">
                   {categories.map((category) => (
-                    <label key={category} className="flex items-center cursor-pointer group">
+                    <label key={category.id} className="flex items-center cursor-pointer group">
                       <input
                         type="checkbox"
-                        checked={selectedCategories.includes(category)}
-                        onChange={() => toggleCategory(category)}
+                        checked={selectedCategories.includes(category.id)}
+                        onChange={() => toggleCategory(category.id)}
                         className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                       />
                       <span className="ml-3 text-gray-700 group-hover:text-gray-900">
-                        {category}
+                        {category.name}
                       </span>
                     </label>
                   ))}
@@ -203,15 +175,15 @@ function ProductsContent() {
                 <h3 className="font-semibold text-gray-900 mb-3">Marca</h3>
                 <div className="space-y-2">
                   {brands.map((brand) => (
-                    <label key={brand} className="flex items-center cursor-pointer group">
+                    <label key={brand.id} className="flex items-center cursor-pointer group">
                       <input
                         type="checkbox"
-                        checked={selectedBrands.includes(brand)}
-                        onChange={() => toggleBrand(brand)}
+                        checked={selectedBrands.includes(brand.id)}
+                        onChange={() => toggleBrand(brand.id)}
                         className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                       />
                       <span className="ml-3 text-gray-700 group-hover:text-gray-900">
-                        {brand}
+                        {brand.name}
                       </span>
                     </label>
                   ))}
@@ -247,7 +219,7 @@ function ProductsContent() {
                 {searchQuery ? `Resultados para "${searchQuery}"` : "Todos los Productos"}
               </h1>
               <p className="text-gray-600">
-                Mostrando {paginatedProducts.length} de {sortedProducts.length} productos
+                Mostrando {products.length} de {totalProducts} productos
               </p>
             </div>
 
@@ -263,30 +235,38 @@ function ProductsContent() {
                     Búsqueda: {searchQuery}
                   </div>
                 )}
-                {selectedCategories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => removeFilter("category", category)}
-                    className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
-                  >
-                    Categoría: {category}
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                ))}
-                {selectedBrands.map((brand) => (
-                  <button
-                    key={brand}
-                    onClick={() => removeFilter("brand", brand)}
-                    className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
-                  >
-                    Marca: {brand}
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                ))}
+                {selectedCategories.map((catId) => {
+                  const cat = categories.find(c => c.id === catId);
+                  if (!cat) return null;
+                  return (
+                    <button
+                      key={catId}
+                      onClick={() => removeFilter("category", catId)}
+                      className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
+                    >
+                      Categoría: {cat.name}
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  );
+                })}
+                {selectedBrands.map((brandId) => {
+                  const brand = brands.find(b => b.id === brandId);
+                  if (!brand) return null;
+                  return (
+                    <button
+                      key={brandId}
+                      onClick={() => removeFilter("brand", brandId)}
+                      className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
+                    >
+                      Marca: {brand.name}
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Sort Dropdown */}
@@ -306,10 +286,26 @@ function ProductsContent() {
             </div>
 
             {/* Products Grid */}
-            {paginatedProducts.length > 0 ? (
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
+                    <div className="h-64 bg-gray-200"></div>
+                    <div className="p-6 space-y-3">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      <div className="flex justify-between items-center pt-4">
+                        <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+                        <div className="h-10 bg-gray-200 rounded w-10"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : products.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-                  {paginatedProducts.map((product) => (
+                  {products.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
@@ -331,11 +327,10 @@ function ProductsContent() {
                       <button
                         key={index + 1}
                         onClick={() => setCurrentPage(index + 1)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                          currentPage === index + 1
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === index + 1
                             ? "bg-indigo-600 text-white"
                             : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                        }`}
+                          }`}
                       >
                         {index + 1}
                       </button>

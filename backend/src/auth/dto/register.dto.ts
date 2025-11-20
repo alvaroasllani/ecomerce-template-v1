@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional } from 'class-validator';
 
 export class RegisterDto {
   @IsEmail({}, { message: 'El email debe ser válido' })
@@ -13,5 +13,9 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty({ message: 'El nombre completo es requerido' })
   fullName: string;
+
+  @IsString()
+  @IsOptional()
+  phoneNumber?: string;
 }
 
