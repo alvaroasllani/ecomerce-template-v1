@@ -19,7 +19,7 @@ import { Role } from '@prisma/client';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) { }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -32,6 +32,11 @@ export class ProductsController {
   findAll(
     @Query('categoryId') categoryId?: string,
     @Query('brandId') brandId?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('sort') sort?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
     @Query('featured') featured?: string,
     @Query('inStock') inStock?: string,
     @Query('search') search?: string,
@@ -40,6 +45,11 @@ export class ProductsController {
 
     if (categoryId) filters.categoryId = +categoryId;
     if (brandId) filters.brandId = +brandId;
+    if (minPrice) filters.minPrice = +minPrice;
+    if (maxPrice) filters.maxPrice = +maxPrice;
+    if (sort) filters.sort = sort;
+    if (page) filters.page = +page;
+    if (limit) filters.limit = +limit;
     if (featured) filters.featured = featured === 'true';
     if (inStock) filters.inStock = inStock === 'true';
     if (search) filters.search = search;

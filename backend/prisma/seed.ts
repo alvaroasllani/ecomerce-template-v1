@@ -119,6 +119,7 @@ async function main() {
   }
 
   // Crear productos
+  // Nota: Se dejan las imágenes vacías ("") según solicitud
   const products = await Promise.all([
     prisma.product.create({
       data: {
@@ -127,7 +128,7 @@ async function main() {
         price: 49.99,
         categoryId: accesoriosCategory.id,
         brandId: flowBrand.id,
-        image: '/products/wireless-charger.jpg',
+        image: '',
         bgColor: 'bg-slate-800',
         featured: true,
         inStock: true,
@@ -142,7 +143,7 @@ async function main() {
         price: 79.99,
         categoryId: accesoriosCategory.id,
         brandId: aeroBrand.id,
-        image: '/products/laptop-sleeve.jpg',
+        image: '',
         bgColor: 'bg-gray-200',
         featured: true,
         inStock: true,
@@ -157,7 +158,7 @@ async function main() {
         price: 34.99,
         categoryId: accesoriosCategory.id,
         brandId: flowBrand.id,
-        image: '/products/travel-adapter.jpg',
+        image: '',
         bgColor: 'bg-teal-300',
         featured: true,
         inStock: true,
@@ -172,7 +173,7 @@ async function main() {
         price: 29.99,
         categoryId: accesoriosCategory.id,
         brandId: orbitBrand.id,
-        image: '/products/phone-stand.jpg',
+        image: '',
         bgColor: 'bg-teal-700',
         featured: true,
         inStock: true,
@@ -187,7 +188,7 @@ async function main() {
         price: 59.99,
         categoryId: cablesCategory.id,
         brandId: orbitBrand.id,
-        image: '/products/usb-hub.jpg',
+        image: '',
         bgColor: 'bg-gray-800',
         featured: false,
         inStock: true,
@@ -202,7 +203,7 @@ async function main() {
         price: 129.99,
         categoryId: audioCategory.id,
         brandId: aeroBrand.id,
-        image: '/products/headphones.jpg',
+        image: '',
         bgColor: 'bg-blue-900',
         featured: false,
         inStock: true,
@@ -217,7 +218,7 @@ async function main() {
         price: 149.99,
         categoryId: almacenamientoCategory.id,
         brandId: flowBrand.id,
-        image: '/products/portable-ssd.jpg',
+        image: '',
         bgColor: 'bg-purple-900',
         featured: false,
         inStock: true,
@@ -232,7 +233,7 @@ async function main() {
         price: 99.99,
         categoryId: accesoriosCategory.id,
         brandId: aeroBrand.id,
-        image: '/products/webcam.jpg',
+        image: '',
         bgColor: 'bg-indigo-800',
         featured: false,
         inStock: false,
@@ -247,7 +248,7 @@ async function main() {
         price: 189.00,
         categoryId: tecladosCategory.id,
         brandId: aeroBrand.id,
-        image: '/products/keyboard-aero.jpg',
+        image: '',
         bgColor: 'bg-teal-800',
         featured: false,
         inStock: true,
@@ -262,7 +263,7 @@ async function main() {
         price: 99.00,
         categoryId: ratonesCategory.id,
         brandId: orbitBrand.id,
-        image: '/products/mouse-orbit.jpg',
+        image: '',
         bgColor: 'bg-slate-900',
         featured: false,
         inStock: true,
@@ -277,7 +278,7 @@ async function main() {
         price: 45.00,
         categoryId: alfombrillasCategory.id,
         brandId: flowBrand.id,
-        image: '/products/deskmat-flow.jpg',
+        image: '',
         bgColor: 'bg-amber-200',
         featured: false,
         inStock: true,
@@ -292,7 +293,7 @@ async function main() {
         price: 65.00,
         categoryId: cablesCategory.id,
         brandId: flowBrand.id,
-        image: '/products/cable-coil.jpg',
+        image: '',
         bgColor: 'bg-amber-100',
         featured: false,
         inStock: true,
@@ -307,7 +308,7 @@ async function main() {
         price: 159.00,
         categoryId: tecladosCategory.id,
         brandId: aeroBrand.id,
-        image: '/products/keyboard-rgb.jpg',
+        image: '',
         bgColor: 'bg-slate-900',
         featured: false,
         inStock: true,
@@ -322,7 +323,7 @@ async function main() {
         price: 85.00,
         categoryId: ratonesCategory.id,
         brandId: orbitBrand.id,
-        image: '/products/mouse-ergo.jpg',
+        image: '',
         bgColor: 'bg-slate-800',
         featured: false,
         inStock: true,
@@ -357,4 +358,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-

@@ -16,7 +16,7 @@ export default function AdminSidebar() {
       setCurrentUser(userData);
       
       // Verificar que sea admin
-      if (userData.role !== "admin") {
+      if (userData.role !== "ADMIN") {
         router.push("/");
       }
     } else {

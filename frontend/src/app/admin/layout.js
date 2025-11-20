@@ -17,7 +17,7 @@ export default function AdminLayout({ children }) {
     }
 
     const userData = JSON.parse(session);
-    if (userData.role !== "admin") {
+    if (userData.role !== "ADMIN") {
       router.push("/");
       return;
     }
