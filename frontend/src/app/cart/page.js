@@ -74,7 +74,7 @@ export default function CartPage() {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-1">{item.name}</h3>
-                        <p className="text-sm text-gray-600">{item.category}</p>
+                        <p className="text-sm text-gray-600">{item.category?.name || item.category}</p>
                         {item.color && (
                           <p className="text-sm text-gray-600 mt-1">Color: {item.color}</p>
                         )}

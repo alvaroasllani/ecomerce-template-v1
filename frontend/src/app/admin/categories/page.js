@@ -1,35 +1,58 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function AdminCategoriesPage() {
+  const router = useRouter();
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ name: "", slug: "" });
 
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
   useEffect(() => {
-    // Cargar categorías desde localStorage
-    const savedCategories = JSON.parse(localStorage.getItem("customCategories") || "[]");
-    
-    // Si no hay categorías, usar las iniciales
-    if (savedCategories.length === 0) {
-      const initialCategories = [
-        { id: 1, name: "Teclados", slug: "keyboards" },
-        { id: 2, name: "Ratones", slug: "mice" },
-        { id: 3, name: "Alfombrillas", slug: "desk-mats" },
-        { id: 4, name: "Cables", slug: "cables" },
-        { id: 5, name: "Accesorios", slug: "accessories" },
-        { id: 6, name: "Audio", slug: "audio" },
-        { id: 7, name: "Almacenamiento", slug: "storage" },
-      ];
-      setCategories(initialCategories);
-      localStorage.setItem("customCategories", JSON.stringify(initialCategories));
-    } else {
-      setCategories(savedCategories);
-    }
+    checkAuth();
+    loadCategories();
   }, []);
+
+  const checkAuth = () => {
+    const sessionStr = localStorage.getItem("userSession");
+    if (!sessionStr) {
+      router.push("/login?redirect=/admin/categories");
+      return;
+    }
+    
+    const session = JSON.parse(sessionStr);
+    if (session.role !== "ADMIN") {
+      router.push("/");
+      return;
+    }
+  };
+
+  const getAuthHeaders = () => {
+    const sessionStr = localStorage.getItem("userSession");
+    const session = JSON.parse(sessionStr);
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.token}`
+    };
+  };
+
+  const loadCategories = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/categories`);
+      const data = await res.json();
+      setCategories(data);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+      alert("Error al cargar categorías");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const generateSlug = (name) => {
     return name
@@ -52,24 +75,37 @@ export default function AdminCategoriesPage() {
     });
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!formData.name.trim()) {
       alert("El nombre es obligatorio");
       return;
     }
 
-    const newCategory = {
-      id: Math.max(...categories.map(c => c.id), 0) + 1,
-      name: formData.name.trim(),
-      slug: formData.slug || generateSlug(formData.name),
-    };
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        slug: formData.slug || generateSlug(formData.name),
+      };
 
-    const updatedCategories = [...categories, newCategory];
-    setCategories(updatedCategories);
-    localStorage.setItem("customCategories", JSON.stringify(updatedCategories));
-    
-    setFormData({ name: "", slug: "" });
-    setIsAdding(false);
+      const res = await fetch(`${apiUrl}/categories`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Error al crear categoría");
+      }
+
+      alert("Categoría creada exitosamente");
+      setFormData({ name: "", slug: "" });
+      setIsAdding(false);
+      loadCategories();
+    } catch (error) {
+      console.error("Error adding category:", error);
+      alert(error.message || "Error al crear categoría");
+    }
   };
 
   const handleEdit = (category) => {
@@ -77,33 +113,61 @@ export default function AdminCategoriesPage() {
     setFormData({ name: category.name, slug: category.slug });
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!formData.name.trim()) {
       alert("El nombre es obligatorio");
       return;
     }
 
-    const updatedCategories = categories.map(cat =>
-      cat.id === editingId
-        ? { ...cat, name: formData.name.trim(), slug: formData.slug || generateSlug(formData.name) }
-        : cat
-    );
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        slug: formData.slug || generateSlug(formData.name),
+      };
 
-    setCategories(updatedCategories);
-    localStorage.setItem("customCategories", JSON.stringify(updatedCategories));
-    
-    setEditingId(null);
-    setFormData({ name: "", slug: "" });
+      const res = await fetch(`${apiUrl}/categories/${editingId}`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Error al actualizar categoría");
+      }
+
+      alert("Categoría actualizada exitosamente");
+      setEditingId(null);
+      setFormData({ name: "", slug: "" });
+      loadCategories();
+    } catch (error) {
+      console.error("Error updating category:", error);
+      alert(error.message || "Error al actualizar categoría");
+    }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!confirm("¿Estás seguro de eliminar esta categoría? Los productos con esta categoría quedarán sin categoría asignada.")) {
       return;
     }
 
-    const updatedCategories = categories.filter(cat => cat.id !== id);
-    setCategories(updatedCategories);
-    localStorage.setItem("customCategories", JSON.stringify(updatedCategories));
+    try {
+      const res = await fetch(`${apiUrl}/categories/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Error al eliminar categoría");
+      }
+
+      alert("Categoría eliminada exitosamente");
+      loadCategories();
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      alert(error.message || "Error al eliminar categoría");
+    }
   };
 
   const handleCancel = () => {
@@ -111,6 +175,17 @@ export default function AdminCategoriesPage() {
     setEditingId(null);
     setFormData({ name: "", slug: "" });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando categorías...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -163,9 +238,10 @@ export default function AdminCategoriesPage() {
                 placeholder="Se genera automáticamente"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400 bg-gray-50"
               />
+              <p className="text-xs text-gray-500 mt-1">URL amigable para esta categoría</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 mt-4">
+          <div className="flex items-center gap-3 mt-6">
             <button
               onClick={isAdding ? handleAdd : handleUpdate}
               className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
@@ -212,6 +288,9 @@ export default function AdminCategoriesPage() {
                 Slug
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Productos
+              </th>
+              <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Acciones
               </th>
             </tr>
@@ -219,11 +298,12 @@ export default function AdminCategoriesPage() {
           <tbody className="divide-y divide-gray-200">
             {categories.length === 0 ? (
               <tr>
-                <td colSpan="4" className="px-6 py-12 text-center text-gray-500">
+                <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
                   <svg className="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                   </svg>
-                  No hay categorías
+                  <p className="font-medium">No hay categorías</p>
+                  <p className="text-sm mt-1">Crea tu primera categoría haciendo clic en "Agregar Categoría"</p>
                 </td>
               </tr>
             ) : (
@@ -241,7 +321,12 @@ export default function AdminCategoriesPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">
+                      {category._count?.products || 0} productos
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => handleEdit(category)}
                         className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
@@ -271,4 +356,3 @@ export default function AdminCategoriesPage() {
     </div>
   );
 }
-

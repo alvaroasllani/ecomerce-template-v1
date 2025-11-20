@@ -43,6 +43,16 @@ export default function SignupPage() {
       return;
     }
 
+    // Validar teléfono si se proporciona
+    if (formData.phoneNumber && formData.phoneNumber.trim()) {
+      const phoneRegex = /^[67][0-9]{7}$/;
+      if (!phoneRegex.test(formData.phoneNumber.trim())) {
+        setError("El número de celular debe tener 8 dígitos y comenzar con 6 o 7");
+        setIsLoading(false);
+        return;
+      }
+    }
+
     if (!formData.acceptTerms) {
       setError("Debes aceptar los términos y condiciones");
       setIsLoading(false);
@@ -50,13 +60,20 @@ export default function SignupPage() {
     }
 
     try {
-      // Registrar nuevo usuario
-      const newUser = await register({
+      // Preparar datos de registro
+      const registerData = {
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,
-        phoneNumber: formData.phoneNumber,
-      });
+      };
+      
+      // Solo incluir phoneNumber si no está vacío
+      if (formData.phoneNumber && formData.phoneNumber.trim()) {
+        registerData.phoneNumber = formData.phoneNumber.trim();
+      }
+      
+      // Registrar nuevo usuario
+      const newUser = await register(registerData);
 
       // Auto-login después del registro
       const loginResponse = await login(formData.email, formData.password);
@@ -67,7 +84,8 @@ export default function SignupPage() {
       const fullSession = {
         ...profile,
         token: loginResponse.access_token,
-        loggedIn: true
+        loggedIn: true,
+        phoneNumber: formData.phoneNumber // Asegurar que el teléfono se guarde localmente al inicio también
       };
 
       localStorage.setItem("userSession", JSON.stringify(fullSession));
@@ -171,7 +189,7 @@ export default function SignupPage() {
             {/* Phone Number */}
             <div>
               <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                Número de Teléfono (Opcional)
+                Número de Celular (Opcional)
               </label>
               <input
                 type="tel"
@@ -179,9 +197,12 @@ export default function SignupPage() {
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
-                placeholder="+1 234 567 890"
+                placeholder="70123456 o 60123456"
+                pattern="[67][0-9]{7}"
+                maxLength="8"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-400"
               />
+              <p className="text-xs text-gray-500 mt-1">8 dígitos, debe comenzar con 6 o 7</p>
             </div>
 
             {/* Password */}

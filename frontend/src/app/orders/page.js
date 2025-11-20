@@ -2,33 +2,63 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export default function OrdersPage() {
+  const router = useRouter();
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Cargar pedidos desde localStorage
-    const savedOrders = localStorage.getItem("orders");
-    if (savedOrders) {
-      const parsedOrders = JSON.parse(savedOrders);
-      // Ordenar por fecha más reciente primero
-      parsedOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
-      setOrders(parsedOrders);
-    }
-  }, []);
+    const fetchOrders = async () => {
+      const sessionStr = localStorage.getItem("userSession");
+      if (!sessionStr) {
+        router.push("/login");
+        return;
+      }
+
+      try {
+        const session = JSON.parse(sessionStr);
+        const token = session.token;
+        
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+        const res = await fetch(`${apiUrl}/orders/my-orders`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setOrders(data);
+        } else {
+          console.error("Error fetching orders");
+          // Si falla por auth, redirigir
+          if (res.status === 401) router.push("/login");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [router]);
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Processing":
+      case "PENDING":
+      case "PROCESSING":
         return "bg-yellow-100 text-yellow-800";
-      case "Shipped":
+      case "SHIPPED":
         return "bg-blue-100 text-blue-800";
-      case "Delivered":
+      case "DELIVERED":
         return "bg-green-100 text-green-800";
-      case "Cancelled":
+      case "CANCELLED":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -37,13 +67,15 @@ export default function OrdersPage() {
 
   const getStatusText = (status) => {
     switch (status) {
-      case "Processing":
+      case "PENDING":
+        return "Pendiente";
+      case "PROCESSING":
         return "Procesando";
-      case "Shipped":
+      case "SHIPPED":
         return "Enviado";
-      case "Delivered":
+      case "DELIVERED":
         return "Entregado";
-      case "Cancelled":
+      case "CANCELLED":
         return "Cancelado";
       default:
         return status;
@@ -58,6 +90,14 @@ export default function OrdersPage() {
       day: "numeric",
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -100,7 +140,7 @@ export default function OrdersPage() {
           <div className="grid grid-cols-1 gap-6">
             {orders.map((order) => (
               <div
-                key={order.orderNumber}
+                key={order.id}
                 className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden"
               >
                 {/* Order Header */}
@@ -120,15 +160,15 @@ export default function OrdersPage() {
                         </span>
                       </div>
                       <p className="text-sm text-gray-600">
-                        Realizado el {formatDate(order.date)}
+                        Realizado el {formatDate(order.createdAt)}
                       </p>
                     </div>
                     <div className="text-left sm:text-right">
                       <p className="text-2xl font-bold text-gray-900">
-                        Bs {order.total.toFixed(2)}
+                        Bs {Number(order.total).toFixed(2)}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {order.items.length} {order.items.length === 1 ? "artículo" : "artículos"}
+                        {order.orderItems.length} {order.orderItems.length === 1 ? "artículo" : "artículos"}
                       </p>
                     </div>
                   </div>
@@ -137,18 +177,21 @@ export default function OrdersPage() {
                 {/* Order Items */}
                 <div className="p-6">
                   <div className="space-y-4 mb-4">
-                    {order.items.map((item, index) => (
-                      <div key={index} className="flex gap-4">
+                    {order.orderItems.map((item) => (
+                      <div key={item.id} className="flex gap-4">
                         <div
-                          className={`${item.bgColor} w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0`}
+                          className={`${item.product.bgColor || 'bg-gray-100'} w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden`}
                         >
-                          <div className="w-8 h-8 bg-white/20 rounded"></div>
+                           {item.product.image ? (
+                             <img src={item.product.image} alt="" className="w-full h-full object-cover" />
+                           ) : (
+                              <div className="w-8 h-8 bg-white/20 rounded"></div>
+                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-gray-900">{item.name}</p>
+                          <p className="font-semibold text-gray-900">{item.product.name}</p>
                           <p className="text-sm text-gray-600">
                             Cantidad: {item.quantity}
-                            {item.color && ` • Color: ${item.color}`}
                           </p>
                         </div>
                         <p className="font-semibold text-gray-900">
@@ -163,37 +206,30 @@ export default function OrdersPage() {
                     <button
                       onClick={() =>
                         setSelectedOrder(
-                          selectedOrder === order.orderNumber ? null : order.orderNumber
+                          selectedOrder === order.id ? null : order.id
                         )
                       }
                       className="flex-1 sm:flex-none px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
                     >
-                      {selectedOrder === order.orderNumber ? "Ocultar" : "Ver"} Detalles
+                      {selectedOrder === order.id ? "Ocultar" : "Ver"} Detalles
                     </button>
-                    {order.status === "Shipped" && (
+                    {order.status === "SHIPPED" && (
                       <button className="flex-1 sm:flex-none px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
                         Rastrear Pedido
                       </button>
                     )}
-                    {order.status === "Delivered" && (
-                      <Link href={`/products/${order.items[0].id}`}>
-                        <button className="flex-1 sm:flex-none px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                          Comprar de Nuevo
-                        </button>
-                      </Link>
-                    )}
                   </div>
 
                   {/* Order Details (Expandable) */}
-                  {selectedOrder === order.orderNumber && (
+                  {selectedOrder === order.id && (
                     <div className="mt-6 pt-6 border-t border-gray-200 space-y-4">
                       <div>
                         <h4 className="font-semibold text-gray-900 mb-2">Dirección de Envío</h4>
                         <p className="text-sm text-gray-600">
-                          {order.shippingAddress.fullName}<br />
-                          {order.shippingAddress.address}<br />
-                          {order.shippingAddress.city}, {order.shippingAddress.postalCode}<br />
-                          {order.shippingAddress.country}
+                          {order.shippingName}<br />
+                          {order.shippingAddress}<br />
+                          {order.shippingCity}, {order.shippingZip}<br />
+                          {order.shippingCountry}
                         </p>
                       </div>
                       <div>
@@ -201,24 +237,24 @@ export default function OrdersPage() {
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Subtotal</span>
-                            <span className="text-gray-900">Bs {order.subtotal.toFixed(2)}</span>
+                            <span className="text-gray-900">Bs {Number(order.subtotal).toFixed(2)}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Envío</span>
                             <span className="text-gray-900">
-                              {order.shipping === 0 ? "GRATIS" : `Bs ${order.shipping.toFixed(2)}`}
+                              {order.shipping === 0 ? "GRATIS" : `Bs ${Number(order.shipping).toFixed(2)}`}
                             </span>
                           </div>
                           <div className="flex justify-between pt-2 border-t border-gray-200 font-semibold">
                             <span className="text-gray-900">Total</span>
-                            <span className="text-gray-900">Bs {order.total.toFixed(2)}</span>
+                            <span className="text-gray-900">Bs {Number(order.total).toFixed(2)}</span>
                           </div>
                         </div>
                       </div>
-                      {order.email && (
+                      {order.shippingEmail && (
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-2">Contacto</h4>
-                          <p className="text-sm text-gray-600">{order.email}</p>
+                          <p className="text-sm text-gray-600">{order.shippingEmail}</p>
                         </div>
                       )}
                     </div>

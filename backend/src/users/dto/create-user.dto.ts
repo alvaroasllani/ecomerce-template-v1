@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsEnum, IsOptional } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsEnum, IsOptional, Matches } from 'class-validator';
 import { Role } from '@prisma/client';
 
 export class CreateUserDto {
@@ -16,6 +16,9 @@ export class CreateUserDto {
   fullName: string;
 
   @IsString()
+  @Matches(/^[67][0-9]{7}$/, {
+    message: 'El número de celular debe tener 8 dígitos y comenzar con 6 o 7'
+  })
   @IsOptional()
   phoneNumber?: string;
 

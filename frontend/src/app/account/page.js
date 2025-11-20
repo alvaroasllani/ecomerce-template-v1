@@ -45,52 +45,163 @@ export default function AccountPage() {
 
   useEffect(() => {
     // Verificar sesión
-    const session = localStorage.getItem("userSession");
-    if (!session) {
-      router.push("/login");
-      return;
-    }
+    const loadUserData = async () => {
+      const session = localStorage.getItem("userSession");
+      if (!session) {
+        router.push("/login");
+        return;
+      }
 
-    const userData = JSON.parse(session);
-    setUser(userData);
+      const userData = JSON.parse(session);
+      setUser(userData);
 
-    // Cargar datos del perfil desde localStorage
-    const savedProfile = localStorage.getItem(`profile_${userData.id}`);
-    if (savedProfile) {
-      const profile = JSON.parse(savedProfile);
-      setProfileData(profile.personal || {
-        firstName: userData.fullName.split(" ")[0] || "",
-        lastName: userData.fullName.split(" ").slice(1).join(" ") || "",
-        email: userData.email,
-        phone: "",
-      });
-      setAddresses(profile.addresses || []);
-      setPaymentMethods(profile.paymentMethods || []);
-      setWishlist(profile.wishlist || []);
-      setSettings(profile.settings || { language: "es", notifications: true });
-    } else {
-      // Datos iniciales
-      setProfileData({
-        firstName: userData.fullName.split(" ")[0] || "",
-        lastName: userData.fullName.split(" ").slice(1).join(" ") || "",
-        email: userData.email,
-        phone: "",
-      });
-    }
+      // Obtener datos actualizados del backend
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+        const res = await fetch(`${apiUrl}/auth/profile`, {
+          headers: {
+            "Authorization": `Bearer ${userData.token}`
+          }
+        });
 
-    setIsLoading(false);
+        if (res.ok) {
+          const freshProfile = await res.json();
+          
+          // Actualizar sesión con datos frescos del backend
+          const updatedSession = {
+            ...userData,
+            ...freshProfile
+          };
+          localStorage.setItem("userSession", JSON.stringify(updatedSession));
+          setUser(updatedSession);
+
+          // Cargar datos del perfil
+          const savedProfile = localStorage.getItem(`profile_${freshProfile.id}`);
+          if (savedProfile) {
+            const profile = JSON.parse(savedProfile);
+            setProfileData(profile.personal || {
+              firstName: freshProfile.fullName.split(" ")[0] || "",
+              lastName: freshProfile.fullName.split(" ").slice(1).join(" ") || "",
+              email: freshProfile.email,
+              phone: freshProfile.phoneNumber || "",
+            });
+            setAddresses(profile.addresses || []);
+            setPaymentMethods(profile.paymentMethods || []);
+            setWishlist(profile.wishlist || []);
+            setSettings(profile.settings || { language: "es", notifications: true });
+          } else {
+            // Datos iniciales desde el backend
+            setProfileData({
+              firstName: freshProfile.fullName.split(" ")[0] || "",
+              lastName: freshProfile.fullName.split(" ").slice(1).join(" ") || "",
+              email: freshProfile.email,
+              phone: freshProfile.phoneNumber || "",
+            });
+          }
+        } else {
+          // Si falla, usar datos de localStorage
+          const savedProfile = localStorage.getItem(`profile_${userData.id}`);
+          if (savedProfile) {
+            const profile = JSON.parse(savedProfile);
+            setProfileData(profile.personal || {
+              firstName: userData.fullName.split(" ")[0] || "",
+              lastName: userData.fullName.split(" ").slice(1).join(" ") || "",
+              email: userData.email,
+              phone: userData.phoneNumber || "",
+            });
+            setAddresses(profile.addresses || []);
+            setPaymentMethods(profile.paymentMethods || []);
+            setWishlist(profile.wishlist || []);
+            setSettings(profile.settings || { language: "es", notifications: true });
+          } else {
+            setProfileData({
+              firstName: userData.fullName.split(" ")[0] || "",
+              lastName: userData.fullName.split(" ").slice(1).join(" ") || "",
+              email: userData.email,
+              phone: userData.phoneNumber || "",
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error loading profile:", error);
+        // Usar datos de localStorage en caso de error
+        setProfileData({
+          firstName: userData.fullName.split(" ")[0] || "",
+          lastName: userData.fullName.split(" ").slice(1).join(" ") || "",
+          email: userData.email,
+          phone: userData.phoneNumber || "",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserData();
   }, [router]);
 
-  const saveProfile = () => {
-    const profileToSave = {
-      personal: profileData,
-      addresses,
-      paymentMethods,
-      wishlist,
-      settings,
-    };
-    localStorage.setItem(`profile_${user.id}`, JSON.stringify(profileToSave));
-    alert("Perfil guardado exitosamente");
+  const saveProfile = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      
+      // Validar número de teléfono si se proporciona
+      if (profileData.phone && profileData.phone.trim()) {
+        const phoneRegex = /^[67][0-9]{7}$/;
+        if (!phoneRegex.test(profileData.phone.trim())) {
+          alert('El número de celular debe tener 8 dígitos y comenzar con 6 o 7');
+          return;
+        }
+      }
+      
+      // Preparar datos, omitiendo campos vacíos
+      const updateData = {
+        fullName: `${profileData.firstName} ${profileData.lastName}`.trim(),
+      };
+      
+      // Solo incluir phoneNumber si no está vacío
+      if (profileData.phone && profileData.phone.trim()) {
+        updateData.phoneNumber = profileData.phone.trim();
+      }
+      
+      const res = await fetch(`${apiUrl}/users/profile`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Error al actualizar el perfil');
+      }
+
+      const updatedUser = await res.json();
+
+      // Actualizar sesión local con los nuevos datos
+      const updatedSession = {
+        ...user,
+        fullName: updatedUser.fullName,
+        phoneNumber: updatedUser.phoneNumber
+      };
+      localStorage.setItem("userSession", JSON.stringify(updatedSession));
+      setUser(updatedSession);
+
+      // Guardar también en el perfil local
+      const profileToSave = {
+        personal: profileData,
+        addresses,
+        paymentMethods,
+        wishlist,
+        settings,
+      };
+      localStorage.setItem(`profile_${user.id}`, JSON.stringify(profileToSave));
+
+      alert("Perfil actualizado exitosamente");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert(error.message || "Error al actualizar el perfil. Por favor intenta de nuevo.");
+    }
   };
 
   const handleProfileChange = (e) => {
@@ -107,18 +218,49 @@ export default function AccountPage() {
     setAddresses(addresses.filter((addr) => addr.id !== id));
   };
 
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
+    
+    if (!passwordForm.currentPassword) {
+      alert("Debes ingresar tu contraseña actual");
+      return;
+    }
+    
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       alert("Las contraseñas no coinciden");
       return;
     }
+    
     if (passwordForm.newPassword.length < 6) {
-      alert("La contraseña debe tener al menos 6 caracteres");
+      alert("La nueva contraseña debe tener al menos 6 caracteres");
       return;
     }
-    alert("Contraseña actualizada exitosamente");
-    setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      const res = await fetch(`${apiUrl}/auth/change-password`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword
+        })
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Error al actualizar la contraseña');
+      }
+
+      alert("Contraseña actualizada exitosamente");
+      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (error) {
+      console.error("Error updating password:", error);
+      alert(error.message || "Error al actualizar la contraseña. Por favor intenta de nuevo.");
+    }
   };
 
   const deleteAccount = () => {
@@ -251,16 +393,19 @@ export default function AccountPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Teléfono
+                        Teléfono (Celular Bolivia)
                       </label>
                       <input
                         type="tel"
                         name="phone"
                         value={profileData.phone}
                         onChange={handleProfileChange}
-                        placeholder="+591 70123456"
+                        placeholder="70123456 o 60123456"
+                        pattern="[67][0-9]{7}"
+                        maxLength="8"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900"
                       />
+                      <p className="text-xs text-gray-500 mt-1">8 dígitos, debe comenzar con 6 o 7</p>
                     </div>
 
                     <button

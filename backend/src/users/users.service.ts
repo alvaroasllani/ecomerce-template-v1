@@ -51,10 +51,36 @@ export class UsersService {
   async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
 
+    // Si se está actualizando la contraseña, hashearla
+    if (updateUserDto.password) {
+      const bcrypt = require('bcrypt');
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
     return this.prisma.user.update({
       where: { id },
       data: updateUserDto,
     });
+  }
+
+  async updateProfile(id: number, updateUserDto: UpdateUserDto) {
+    // Los usuarios normales no pueden cambiar su rol o email
+    const { role, email, ...safeUpdates } = updateUserDto;
+
+    // Si se está actualizando la contraseña, hashearla
+    if (safeUpdates.password) {
+      const bcrypt = require('bcrypt');
+      safeUpdates.password = await bcrypt.hash(safeUpdates.password, 10);
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: safeUpdates,
+    });
+
+    // Excluir password del resultado
+    const { password: _, ...result } = user;
+    return result;
   }
 
   async remove(id: number) {

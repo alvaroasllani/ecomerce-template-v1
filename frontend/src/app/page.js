@@ -14,7 +14,8 @@ export default function Home() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        const products = await getProducts();
+        const response = await getProducts();
+        const products = response.data || []; // Extraer data de la respuesta paginada
         // Filtrar solo los destacados
         const featured = products.filter(p => p.featured);
         setFeaturedProducts(featured.length > 0 ? featured : products.slice(0, 4));

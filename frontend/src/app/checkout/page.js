@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
@@ -9,7 +9,9 @@ import { useCart } from "@/context/CartContext";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, cartTotal } = useCart();
+  const { cart, cartTotal, clearCart } = useCart();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
   
   const [formData, setFormData] = useState({
     email: "",
@@ -25,42 +27,105 @@ export default function CheckoutPage() {
     saveInfo: false,
   });
 
+  useEffect(() => {
+    // Verificar autenticación
+    const session = localStorage.getItem("userSession");
+    if (!session) {
+      router.push("/login?redirect=/checkout");
+      return;
+    }
+    
+    // Pre-llenar datos si están disponibles en el perfil
+    try {
+      const { fullName, email, phoneNumber } = JSON.parse(session);
+      setFormData(prev => ({
+        ...prev,
+        fullName: fullName || "",
+        email: email || "",
+        phone: phoneNumber || ""
+      }));
+    } catch (e) {
+      console.error("Error parsing session", e);
+    }
+  }, [router]);
+
   const shippingCost = cartTotal > 500 ? 0 : 20;
   const total = cartTotal + shippingCost;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Generar número de orden aleatorio
-    const orderNumber = Math.floor(100000000 + Math.random() * 900000000);
-    
-    // Crear objeto de pedido
-    const order = {
-      orderNumber: orderNumber,
-      date: new Date().toISOString(),
-      status: "Procesando",
-      items: cart,
-      subtotal: cartTotal,
-      shipping: shippingCost,
-      total: total,
-      customer: {
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        zone: formData.zone,
-        country: formData.country,
+    setIsSubmitting(true);
+    setError("");
+
+    // Validar número de teléfono
+    const phoneRegex = /^[67][0-9]{7}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      setError("El número de celular debe tener 8 dígitos y comenzar con 6 o 7");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const sessionStr = localStorage.getItem("userSession");
+      if (!sessionStr) {
+        router.push("/login?redirect=/checkout");
+        return;
       }
-    };
-    
-    // Guardar pedido en localStorage
-    const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-    existingOrders.push(order);
-    localStorage.setItem("orders", JSON.stringify(existingOrders));
-    
-    // Redirigir a confirmación
-    router.push(`/checkout/confirmation?order=${orderNumber}`);
+
+      const session = JSON.parse(sessionStr);
+      const token = session.token;
+
+      const payload = {
+        items: cart.map(item => ({
+          productId: item.id,
+          quantity: item.quantity
+        })),
+        shippingName: formData.fullName,
+        shippingEmail: formData.email,
+        shippingAddress: formData.address,
+        shippingCity: formData.city,
+        shippingZip: formData.zone || "0000",
+        shippingCountry: formData.country,
+        shipping: shippingCost
+      };
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      const res = await fetch(`${apiUrl}/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Error al procesar el pedido");
+      }
+
+      const newOrder = await res.json();
+      
+      // Limpiar carrito
+      clearCart();
+      
+      // Guardar pedido en localStorage (opcional, para historial local rápido)
+      const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+      existingOrders.push({
+        ...newOrder,
+        items: cart // Guardamos items completos para visualización offline si fuera necesario
+      });
+      localStorage.setItem("orders", JSON.stringify(existingOrders));
+      
+      // Redirigir a confirmación usando el ID o número de orden real
+      router.push(`/checkout/confirmation?order=${newOrder.orderNumber}`);
+
+    } catch (err) {
+      console.error("Checkout error:", err);
+      setError(err.message || "Ocurrió un error inesperado. Por favor intenta de nuevo.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -124,6 +189,12 @@ export default function CheckoutPage() {
           <div className="lg:col-span-2">
             <h1 className="text-4xl font-bold text-gray-900 mb-8">Finalizar Compra</h1>
 
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Contact */}
               <div>
@@ -174,8 +245,11 @@ export default function CheckoutPage() {
                       value={formData.phone}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
-                      placeholder="Ej: 70123456 o 22123456"
+                      placeholder="70123456 o 60123456"
+                      pattern="[67][0-9]{7}"
+                      maxLength="8"
                     />
+                    <p className="text-xs text-gray-500 mt-1">8 dígitos, debe comenzar con 6 o 7</p>
                   </div>
                   
                   <div>
@@ -370,9 +444,12 @@ export default function CheckoutPage() {
 
               <button
                 onClick={handleSubmit}
-                className="w-full bg-indigo-600 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg mb-4"
+                disabled={isSubmitting}
+                className={`w-full bg-indigo-600 text-white py-4 rounded-lg font-semibold transition-colors shadow-lg mb-4 ${
+                  isSubmitting ? 'opacity-75 cursor-not-allowed' : 'hover:bg-indigo-700'
+                }`}
               >
-                Completar Pedido
+                {isSubmitting ? 'Procesando...' : 'Completar Pedido'}
               </button>
 
               <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
