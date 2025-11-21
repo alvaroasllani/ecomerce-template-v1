@@ -5,7 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(createUserDto: CreateUserDto) {
     return this.prisma.user.create({
@@ -88,6 +88,26 @@ export class UsersService {
 
     return this.prisma.user.delete({
       where: { id },
+    });
+  }
+  async updatePasswordResetToken(id: number, token: string | null, expires: Date | null) {
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        resetPasswordToken: token,
+        resetPasswordExpires: expires,
+      },
+    });
+  }
+
+  async findByResetToken(token: string) {
+    return this.prisma.user.findFirst({
+      where: {
+        resetPasswordToken: token,
+        resetPasswordExpires: {
+          gt: new Date(),
+        },
+      },
     });
   }
 }
