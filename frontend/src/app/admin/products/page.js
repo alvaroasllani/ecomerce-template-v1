@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { uploadImage } from "@/lib/api";
 
 export default function AdminProductsPage() {
   const router = useRouter();
@@ -28,6 +29,8 @@ export default function AdminProductsPage() {
     rating: 0,
     reviews: 0,
   });
+  const [uploadMethod, setUploadMethod] = useState("file");
+  const [imagePreview, setImagePreview] = useState(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -44,7 +47,7 @@ export default function AdminProductsPage() {
       router.push("/login?redirect=/admin/products");
       return;
     }
-    
+
     const session = JSON.parse(sessionStr);
     if (session.role !== "ADMIN") {
       router.push("/");
@@ -136,6 +139,42 @@ export default function AdminProductsPage() {
     }
   };
 
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert("Por favor selecciona un archivo de imagen válido");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert("La imagen no debe superar 5MB");
+        return;
+      }
+
+      try {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+
+        const result = await uploadImage(file);
+        setFormData(prev => ({ ...prev, image: result.secure_url }));
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert("Error al subir la imagen: " + error.message);
+        setImagePreview(null);
+      }
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setFormData(prev => ({ ...prev, image: "" }));
+    setImagePreview(null);
+  };
+
   const openModal = (product = null) => {
     if (product) {
       setEditingProduct(product);
@@ -152,6 +191,10 @@ export default function AdminProductsPage() {
         rating: product.rating || 0,
         reviews: product.reviews || 0,
       });
+      setImagePreview(product.image || null);
+      if (product.image) {
+        setUploadMethod("file"); // Default to file view if image exists, or logic to detect url? Actually just show preview.
+      }
     } else {
       setEditingProduct(null);
       setFormData({
@@ -167,6 +210,8 @@ export default function AdminProductsPage() {
         rating: 0,
         reviews: 0,
       });
+      setImagePreview(null);
+      setUploadMethod("file");
     }
     setShowModal(true);
   };
@@ -194,10 +239,10 @@ export default function AdminProductsPage() {
     };
 
     try {
-      const url = editingProduct 
-        ? `${apiUrl}/products/${editingProduct.id}` 
+      const url = editingProduct
+        ? `${apiUrl}/products/${editingProduct.id}`
         : `${apiUrl}/products`;
-      
+
       const method = editingProduct ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {
@@ -232,7 +277,7 @@ export default function AdminProductsPage() {
   const filteredProducts = products
     .filter(p => {
       const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          p.description.toLowerCase().includes(searchQuery.toLowerCase());
+        p.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = filterCategory === "all" || p.categoryId.toString() === filterCategory;
       return matchesSearch && matchesCategory;
     })
@@ -415,11 +460,10 @@ export default function AdminProductsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
                         onClick={() => handleToggleStock(product)}
-                        className={`px-3 py-1 text-xs font-medium rounded-full ${
-                          product.inStock
-                            ? "bg-green-100 text-green-800 hover:bg-green-200"
-                            : "bg-red-100 text-red-800 hover:bg-red-200"
-                        }`}
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${product.inStock
+                          ? "bg-green-100 text-green-800 hover:bg-green-200"
+                          : "bg-red-100 text-red-800 hover:bg-red-200"
+                          }`}
                       >
                         {product.inStock ? "En Stock" : "Agotado"}
                       </button>
@@ -567,18 +611,83 @@ export default function AdminProductsPage() {
 
                 {/* Image URL and BG Color */}
                 <div className="grid grid-cols-2 gap-4">
+
+
+                  {/* Image Upload */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      URL de Imagen
+                      Imagen del Producto
                     </label>
-                    <input
-                      type="text"
-                      name="image"
-                      value={formData.image}
-                      onChange={handleChange}
-                      placeholder="https://..."
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900"
-                    />
+
+                    <div className="flex gap-4 mb-4">
+                      <button
+                        type="button"
+                        onClick={() => setUploadMethod("file")}
+                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${uploadMethod === "file"
+                          ? "bg-indigo-600 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                          }`}
+                      >
+                        Subir Archivo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setUploadMethod("url")}
+                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${uploadMethod === "url"
+                          ? "bg-indigo-600 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                          }`}
+                      >
+                        URL Externa
+                      </button>
+                    </div>
+
+                    {uploadMethod === "file" && (
+                      <div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                          id="imageUpload"
+                        />
+                        <label
+                          htmlFor="imageUpload"
+                          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                        >
+                          <span className="text-sm text-gray-600">Haz clic para subir imagen</span>
+                          <span className="text-xs text-gray-500 mt-1">Max 5MB</span>
+                        </label>
+                      </div>
+                    )}
+
+                    {uploadMethod === "url" && (
+                      <input
+                        type="text"
+                        name="image"
+                        value={formData.image}
+                        onChange={handleChange}
+                        placeholder="https://..."
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-gray-900"
+                      />
+                    )}
+
+                    {(imagePreview || formData.image) && (
+                      <div className="mt-4 relative inline-block">
+                        <img
+                          src={imagePreview || formData.image}
+                          alt="Preview"
+                          className="w-20 h-20 object-cover rounded-lg border border-gray-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div>

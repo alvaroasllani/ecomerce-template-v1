@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { uploadImage } from "@/lib/api";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -29,10 +30,10 @@ export default function NewProductPage() {
     // Cargar categorías y marcas dinámicamente
     const savedCategories = JSON.parse(localStorage.getItem("customCategories") || "[]");
     const savedBrands = JSON.parse(localStorage.getItem("customBrands") || "[]");
-    
+
     setCategories(savedCategories);
     setBrands(savedBrands);
-    
+
     // Establecer valores por defecto
     if (savedCategories.length > 0 && !formData.category) {
       setFormData(prev => ({ ...prev, category: savedCategories[0].name }));
@@ -64,7 +65,9 @@ export default function NewProductPage() {
     });
   };
 
-  const handleImageUpload = (e) => {
+
+
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
       // Validar tipo de archivo
@@ -79,14 +82,22 @@ export default function NewProductPage() {
         return;
       }
 
-      // Convertir a base64
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        setFormData({ ...formData, image: base64String });
-        setImagePreview(base64String);
-      };
-      reader.readAsDataURL(file);
+      try {
+        // Mostrar preview temporal mientras se sube
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+
+        // Subir a Cloudinary
+        const result = await uploadImage(file);
+        setFormData({ ...formData, image: result.secure_url });
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert("Error al subir la imagen: " + error.message);
+        setImagePreview(null);
+      }
     }
   };
 
@@ -101,7 +112,7 @@ export default function NewProductPage() {
 
     // Obtener productos actuales
     const customProducts = JSON.parse(localStorage.getItem("customProducts") || "[]");
-    
+
     // Crear nuevo producto
     const newProduct = {
       id: Math.max(...customProducts.map(p => p.id), 0) + 1,
@@ -186,28 +197,26 @@ export default function NewProductPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Imagen del Producto
             </label>
-            
+
             {/* Método de carga */}
             <div className="flex gap-4 mb-4">
               <button
                 type="button"
                 onClick={() => setUploadMethod("file")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  uploadMethod === "file"
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${uploadMethod === "file"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
               >
                 📁 Subir desde PC/Teléfono
               </button>
               <button
                 type="button"
                 onClick={() => setUploadMethod("url")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  uploadMethod === "url"
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${uploadMethod === "url"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
               >
                 🔗 URL / Google Drive
               </button>

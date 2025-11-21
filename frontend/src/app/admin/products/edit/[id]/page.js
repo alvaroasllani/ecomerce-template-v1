@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import { uploadImage } from "@/lib/api";
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -61,7 +62,7 @@ export default function EditProductPage() {
     });
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
@@ -74,13 +75,20 @@ export default function EditProductPage() {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        setFormData({ ...formData, image: base64String });
-        setImagePreview(base64String);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+
+        const result = await uploadImage(file);
+        setFormData({ ...formData, image: result.secure_url });
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert("Error al subir la imagen: " + error.message);
+        setImagePreview(null);
+      }
     }
   };
 
@@ -95,7 +103,7 @@ export default function EditProductPage() {
 
     // Obtener productos actuales
     const customProducts = JSON.parse(localStorage.getItem("customProducts") || "[]");
-    
+
     // Actualizar producto
     const updatedProduct = {
       ...formData,
@@ -104,10 +112,10 @@ export default function EditProductPage() {
       reviews: parseInt(formData.reviews),
     };
 
-    const updatedProducts = customProducts.map(p => 
+    const updatedProducts = customProducts.map(p =>
       p.id === productId ? updatedProduct : p
     );
-    
+
     localStorage.setItem("customProducts", JSON.stringify(updatedProducts));
 
     alert("Producto actualizado exitosamente");
@@ -191,28 +199,26 @@ export default function EditProductPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Imagen del Producto
             </label>
-            
+
             {/* Método de carga */}
             <div className="flex gap-4 mb-4">
               <button
                 type="button"
                 onClick={() => setUploadMethod("file")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  uploadMethod === "file"
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${uploadMethod === "file"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
               >
                 📁 Subir desde PC/Teléfono
               </button>
               <button
                 type="button"
                 onClick={() => setUploadMethod("url")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  uploadMethod === "url"
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${uploadMethod === "url"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
               >
                 🔗 URL / Google Drive
               </button>
