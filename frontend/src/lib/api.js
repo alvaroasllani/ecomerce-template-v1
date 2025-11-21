@@ -80,3 +80,56 @@ export async function getProfile(token) {
 
     return res.json();
 }
+
+export async function forgotPassword(email) {
+    const res = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+    });
+
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Error al solicitar recuperación');
+    }
+
+    return res.json();
+}
+
+export async function resetPassword(token, newPassword) {
+    const res = await fetch(`${API_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, newPassword }),
+    });
+
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Error al restablecer contraseña');
+    }
+
+    return res.json();
+}
+
+export async function uploadImage(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const session = localStorage.getItem('userSession');
+    const token = session ? JSON.parse(session).token : null;
+
+    const res = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+    });
+
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Error al subir la imagen');
+    }
+
+    return res.json();
+}
